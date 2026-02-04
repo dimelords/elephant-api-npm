@@ -6,39 +6,44 @@
   "type": "module",
   "exports": {
     "./repository": {
-      "types": "./dist/repository/index.d.ts",
-      "import": "./dist/repository/index.js",
+      "types": "./dist/repository/index.d.mts",
+      "import": "./dist/repository/index.mjs",
       "require": "./dist/repository/index.cjs"
     },
     "./repositorysocket": {
-      "types": "./dist/repositorysocket/index.d.ts",
-      "import": "./dist/repositorysocket/index.js",
+      "types": "./dist/repositorysocket/index.d.mts",
+      "import": "./dist/repositorysocket/index.mjs",
       "require": "./dist/repositorysocket/index.cjs"
     },
     "./newsdoc": {
-      "types": "./dist/newsdoc/newsdoc.d.ts",
-      "import": "./dist/newsdoc/newsdoc.js",
+      "types": "./dist/newsdoc/newsdoc.d.mts",
+      "import": "./dist/newsdoc/newsdoc.mjs",
       "require": "./dist/newsdoc/newsdoc.cjs"
     },
     "./index": {
-      "types": "./dist/index/index.d.ts",
-      "import": "./dist/index/index.js",
+      "types": "./dist/index/index.d.mts",
+      "import": "./dist/index/index.mjs",
       "require": "./dist/index/index.cjs"
     },
     "./spell": {
-      "types": "./dist/spell/index.d.ts",
-      "import": "./dist/spell/index.js",
+      "types": "./dist/spell/index.d.mts",
+      "import": "./dist/spell/index.mjs",
       "require": "./dist/spell/index.cjs"
     },
     "./user": {
-      "types": "./dist/user/index.d.ts",
-      "import": "./dist/user/index.js",
+      "types": "./dist/user/index.d.mts",
+      "import": "./dist/user/index.mjs",
       "require": "./dist/user/index.cjs"
     },
     "./replicant": {
-      "types": "./dist/replicant/index.d.ts",
-      "import": "./dist/replicant/index.js",
+      "types": "./dist/replicant/index.d.mts",
+      "import": "./dist/replicant/index.mjs",
       "require": "./dist/replicant/index.cjs"
+    },
+    "./genai": {
+      "types": "./dist/genai/index.d.mts",
+      "import": "./dist/genai/index.mjs",
+      "require": "./dist/genai/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -58,7 +63,8 @@
     "build:spell": "tsdown ./src/spell/index.ts --format cjs,esm --dts --outDir ./dist/spell",
     "build:user": "tsdown ./src/user/index.ts --format cjs,esm --dts --outDir ./dist/user",
     "build:replicant": "tsdown ./src/replicant/index.ts --format cjs,esm --dts --outDir ./dist/replicant",
-    "build": "npm run build:repository && npm run build:repositorysocket && npm run build:newsdoc && npm run build:index && npm run build:spell && npm run build:user && npm run build:replicant",
+    "build:genai": "tsdown ./src/genai/index.ts --format cjs,esm --dts --outDir ./dist/genai",
+    "build": "npm run build:repository && npm run build:repositorysocket && npm run build:newsdoc && npm run build:index && npm run build:spell && npm run build:user && npm run build:replicant && npm run build:genai",
     "update": "bash .github/workflows/update.sh",
     "prepublish": "npm run build"
   },

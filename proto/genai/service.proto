@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package elephant.genai;
+
+option go_package = "github.com/dimelords/elephant-api/genai";
+
+// GenAI service provides AI-powered text generation capabilities
+service GenAI {
+  // Generate text using a prompt document
+  rpc Generate(GenerateRequest) returns (GenerateResponse);
+
+  // List available AI models
+  rpc ListModels(ListModelsRequest) returns (ListModelsResponse);
+
+  // Get generation history for a document
+  rpc GetHistory(GetHistoryRequest) returns (GetHistoryResponse);
+}
+
+// Request to generate text from a prompt
+message GenerateRequest {
+  // UUID of core/prompt document in repository
+  string prompt_uuid = 1;
+
+  // Optional: override model (defaults to prompt's configured model)
+  string model_id = 2;
+
+  // Template variables to substitute in prompt
+  // Example: {"paragraph": "The text to analyze..."}
+  map<string, string> variables = 3;
+}
+
+// Response containing generated text
+message GenerateResponse {
+  // Unique ID for this generation
+  string generation_id = 1;
+
+  // Generated text from AI
+  string text = 2;
+
+  // Metadata about the generation
+  GenerationMetadata metadata = 3;
+}
+
+// Metadata about AI generation
+message GenerationMetadata {
+  // Number of tokens in prompt
+  int32 prompt_tokens = 1;
+
+  // Number of tokens in completion
+  int32 completion_tokens = 2;
+
+  // Estimated cost in USD
+  double cost_usd = 3;
+
+  // Duration in milliseconds
+  int64 duration_ms = 4;
+
+  // Model used for generation
+  string model = 5;
+}
+
+// Request to list available models
+message ListModelsRequest {}
+
+// Response with list of available models
+message ListModelsResponse {
+  repeated Model models = 1;
+}
+
+// AI model information
+message Model {
+  // Model identifier (e.g., "gpt-4", "claude-3-opus")
+  string id = 1;
+
+  // Provider name (e.g., "openai", "anthropic")
+  string provider = 2;
+
+  // Model name
+  string name = 3;
+
+  // Display name for UI
+  string display_name = 4;
+
+  // Whether model supports streaming
+  bool streaming_supported = 5;
+
+  // Whether model supports vision/images
+  bool vision_supported = 6;
+
+  // Whether model is currently enabled
+  bool enabled = 7;
+}
+
+// Request to get generation history
+message GetHistoryRequest {
+  // Optional: filter by document UUID
+  string document_uuid = 1;
+
+  // Optional: limit number of results
+  int32 limit = 2;
+
+  // Optional: offset for pagination
+  int32 offset = 3;
+}
+
+// Response with generation history
+message GetHistoryResponse {
+  repeated GenerationRecord records = 1;
+
+  // Total count (for pagination)
+  int32 total = 2;
+}
+
+// Historical generation record
+message GenerationRecord {
+  // Generation ID
+  string id = 1;
+
+  // Document UUID (prompt)
+  string document_uuid = 2;
+
+  // Model used
+  string model = 3;
+
+  // Prompt text (truncated)
+  string prompt_preview = 4;
+
+  // Generated text (truncated)
+  string text_preview = 5;
+
+  // Generation metadata
+  GenerationMetadata metadata = 6;
+
+  // Status: "completed", "failed", "pending"
+  string status = 7;
+
+  // Error message if failed
+  string error_message = 8;
+
+  // Who requested generation
+  string created_by = 9;
+
+  // When generation was requested
+  string created_at = 10;
+
+  // When generation completed
+  string completed_at = 11;
+}
