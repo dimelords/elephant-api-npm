@@ -6,6 +6,250 @@ package elephant.user;
 
 option go_package = "github.com/ttab/elephant-api/user";
 
+// Settings service manages configuration for authenticated users.
+//
+// All methods in this service rely on the `sub` claim from the
+// authentication (bearer) token to identify the target user.
+service Settings {
+  // Gets a specific document for the authenticated user.
+  rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse);
+  // Lists documents for the authenticated user.
+  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse);
+  // Updates an existing or creates a new document for the authenticated user.
+  rpc UpdateDocument(UpdateDocumentRequest) returns (UpdateDocumentResponse);
+  // Deletes a document for the authenticated user.
+  rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse);
+
+  // Gets properties for the authenticated user.
+  rpc GetProperties(GetPropertiesRequest) returns (GetPropertiesResponse);
+  // Sets or updates properties for the authenticated user.
+  rpc SetProperties(SetPropertiesRequest) returns (SetPropertiesResponse);
+  // Deletes properties for the authenticated user.
+  rpc DeleteProperties(DeletePropertiesRequest) returns (DeletePropertiesResponse);
+
+  // Polls for a stream of changes (creates, updates, deletes)
+  // for both documents and properties for the authenticated user.
+  rpc PollEventLog(PollEventLogRequest) returns (PollEventLogResponse);
+}
+
+message GetDocumentRequest {
+  // URI of the document owner. Optional, defaults to the caller URI (`sub` claim).
+  // Can be a user, unit or organization. (e.g., core://user/1234, core://unit/abc, core://org/ab)
+  string owner = 1;
+  // The unique application identifier in reverse domain notation
+  // (e.g., `com.example.assignments` or `com.example.writer`).
+  string application = 2;
+  // Type is the content type of the document.
+  string type = 3;
+  // Unique identifier for the document within the scope of the application and type.
+  // Can be a human readable slug or a UUID.
+  string key = 4;
+}
+
+message GetDocumentResponse {
+  Document document = 1;
+}
+
+message Document {
+  // URI of the document owner.
+  string owner = 1;
+  // The unique application identifier in reverse domain notation
+  // (e.g., `com.example.assignments` or `com.example.writer`).
+  string application = 2;
+  // Type is the content type of the document.
+  string type = 3;
+  // Unique identifier for the document within the scope of the application and type.
+  // Can be a human readable slug or a UUID.
+  string key = 4;
+  // Version of the document.
+  int64 version = 5;
+  // Semver string indicating the schema version of the payload.
+  string schema_version = 6;
+  // ReadOnly is set to true if the document is shared.
+  bool read_only = 7;
+  // Title of the document.
+  string title = 8;
+  // Creation time in RFC3339 format.
+  string created = 9;
+  // Last update time in RFC3339 format.
+  string updated = 10;
+  // UpdatedBy is the identity of the party that last updated the document.
+  string updated_by = 11;
+  // Payload contains a newsdoc document with actual configuration data.
+  newsdoc.Document payload = 12;
+}
+
+message ListDocumentsRequest {
+  // The unique application identifier in reverse domain notation
+  // (e.g., `com.example.assignments` or `com.example.writer`).
+  // If empty, returns documents across all applications.
+  string application = 1;
+  // Type is the content type of the document.
+  // If provided, filters documents by type.
+  // If `application` is empty, returns documents of this type across all applications.
+  string type = 2;
+  // If true, include the document payload in the response.
+  // If false (default), payload will be omitted.
+  bool include_payload = 3;
+}
+
+message ListDocumentsResponse {
+  repeated Document documents = 1;
+}
+
+message UpdateDocumentRequest {
+  // URI of the document owner. Optional, defaults to the caller URI (`sub` claim).
+  // Can be a user, unit or organization. (e.g., core://user/1234, core://unit/abc, core://org/ab)
+  // Only admin users can set it to a unit or organization.
+  string owner = 1;
+  // The unique application identifier in reverse domain notation
+  // (e.g., `com.example.assignments` or `com.example.writer`).
+  string application = 2;
+  // Type is the content type of the document.
+  string type = 3;
+  // Unique identifier for the document within the scope of the application and type.
+  // Can be a human readable slug or a UUID.
+  string key = 4;
+  // Semver string indicating the schema version of the payload.
+  string schema_version = 5;
+  // Payload contains a newsdoc document with actual configuration data.
+  newsdoc.Document payload = 6;
+}
+
+message UpdateDocumentResponse {}
+
+message DeleteDocumentRequest {
+  // URI of the document owner. If omitted, defaults to the caller URI (`sub` claim).
+  // Can be a user, unit or organization. (e.g., core://user/1234, core://unit/abc, core://org/ab)
+  // Only admin users can delete documents owned by a unit or organization.
+  string owner = 1;
+  // The unique application identifier in reverse domain notation
+  // (e.g., `com.example.assignments` or `com.example.writer`).
+  string application = 2;
+  // Type is the content type of the document.
+  string type = 3;
+  // Unique identifier for the document within the scope of the application and type.
+  // Can be a human readable slug or a UUID.
+  string key = 4;
+}
+
+message DeleteDocumentResponse {}
+
+// Property represents a generic key-value pair attached to a user.
+// It can be used for preferences, user state, feature flags etc.
+message Property {
+  // URI of the property owner. Matches the caller `sub` claim.
+  string owner = 1;
+  // The unique application identifier in reverse domain notation
+  // (e.g., `com.example.assignments` or `com.example.writer`).
+  string application = 2;
+  // Unique identifier for the property within the application.
+  string key = 3;
+  // The value serialized as a string.
+  string value = 4;
+  // Creation time in RFC3339 format.
+  string created = 5;
+  // Last update time in RFC3339 format.
+  string updated = 6;
+}
+
+message GetPropertiesRequest {
+  // The unique application identifier in reverse domain notation
+  // (e.g., `com.example.assignments` or `com.example.writer`).
+  // If empty, returns properties across all applications.
+  string application = 1;
+  // Unique identifier(s) for the property.
+  // If provided, filters properties by key.
+  // If `application` is empty, returns properties with these keys across all applications.
+  repeated string keys = 2;
+}
+
+message GetPropertiesResponse {
+  repeated Property properties = 1;
+}
+
+message PropertyUpdate {
+  // The unique application identifier in reverse domain notation
+  // (e.g., `com.example.assignments` or `com.example.writer`).
+  string application = 1;
+  // Unique identifier for the property within the application.
+  string key = 2;
+  // The value serialized as a string.
+  string value = 3;
+}
+
+message SetPropertiesRequest {
+  repeated PropertyUpdate properties = 1;
+}
+
+message SetPropertiesResponse {}
+
+message PropertyDelete {
+  // The unique application identifier in reverse domain notation
+  // (e.g., `com.example.assignments` or `com.example.writer`).
+  string application = 1;
+  // Unique identifier for the property within the application.
+  string key = 2;
+}
+
+message DeletePropertiesRequest {
+  repeated PropertyDelete properties = 1;
+}
+
+message DeletePropertiesResponse {}
+
+message PollEventLogRequest {
+  // ID of the event after which to start returning events.
+  // Set to -1 for the initial request.
+  int64 after_id = 1;
+}
+
+message PollEventLogResponse {
+  // ID of the most recent event returned. Use for subsequent polling requests.
+  // If no new events are returned, it matches the `after_id` from the request.
+  int64 last_id = 1;
+  // Event log items sorted in ascending order by id (oldest first).
+  repeated EventLogEntry entries = 2;
+}
+
+message EventLogEntry {
+  // ID of the event.
+  int64 id = 1;
+  // ID of the resource owner. Can be a user, unit or organization.
+  // (e.g., core://user/1234, core://unit/abc, core://org/ab)
+  string owner = 2;
+  // The type of change.
+  EventLogEntryType type = 3;
+  // Kind of the resource.
+  ResourceKind kind = 4;
+  // The unique application identifier in reverse domain notation
+  // (e.g., `com.example.assignments` or `com.example.writer`).
+  string application = 5;
+  // DocumentType is the content type of the document.
+  string document_type = 6;
+  // Unique identifier for a resource within the scope of the owner and
+  // application (and document type when kind is `RESOURCE_KIND_DOCUMENT`).
+  string key = 7;
+  // Version of the document.
+  int64 version = 8;
+  // UpdatedBy is the identity of the party that last updated the resource.
+  string updated_by = 9;
+  // Occurrence time in RFC3339 format.
+  string created = 10;
+}
+
+enum EventLogEntryType {
+  EVENT_LOG_ENTRY_UNSPECIFIED = 0;
+  EVENT_LOG_ENTRY_UPDATE      = 1;
+  EVENT_LOG_ENTRY_DELETE      = 2;
+}
+
+enum ResourceKind {
+  RESOURCE_KIND_UNSPECIFIED = 0;
+  RESOURCE_KIND_DOCUMENT    = 1;
+  RESOURCE_KIND_PROPERTY    = 2;
+}
+
 service Messages {
   // Pushes a new message to a recipient.
   rpc PushMessage(PushMessageRequest) returns (PushMessageResponse);
@@ -25,13 +269,13 @@ service Messages {
 
 message PushMessageRequest {
   // Type of message being sent (e.g. "rpc_error").
-  string type                 = 1;
+  string type = 1;
   // Recipient of the message (user sub).
-  string recipient            = 2;
+  string recipient = 2;
   // UUID of the associated document, optional.
-  string doc_uuid             = 3;
+  string doc_uuid = 3;
   // Type of the associated document, optional.
-  string doc_type             = 4;
+  string doc_type = 4;
   // Payload containing a key-value map.
   map<string, string> payload = 5;
 }
@@ -40,9 +284,9 @@ message PushMessageResponse {}
 
 message PushInboxMessageRequest {
   // Recipient of the message (user sub).
-  string recipient          = 1;
+  string recipient = 1;
   // Payload containing a newsdoc document.
-  newsdoc.Document payload  = 2;
+  newsdoc.Document payload = 2;
 }
 
 message PushInboxMessageResponse {}
@@ -56,27 +300,27 @@ message PollMessagesRequest {
 message PollMessagesResponse {
   // ID of the most recent message returned. Use for subsequent polling requests.
   // If no new messages are returned, it matches the `after_id` from the request.
-  int64 last_id             = 1;
+  int64 last_id = 1;
   // Messages sorted in ascending order by id (oldest first).
   repeated Message messages = 2;
 }
 
 message Message {
   // ID of the message.
-  int64 id                    = 1;
+  int64 id = 1;
   // Type of message being sent (e.g. "rpc_error").
-  string type                 = 2;
+  string type = 2;
   // Created timestamp is the RFC3339 timestamp
   // for when the message was created.
-  string created              = 3;
+  string created = 3;
   // Creator of the message (application sub).
-  string created_by           = 4;
+  string created_by = 4;
   // Recipient of the message (user sub).
-  string recipient            = 5;
+  string recipient = 5;
   // UUID of the associated document, optional.
-  string doc_uuid             = 6;
+  string doc_uuid = 6;
   // Type of the associated document, optional.
-  string doc_type             = 7;
+  string doc_type = 7;
   // Payload containing a key-value map.
   map<string, string> payload = 8;
 }
@@ -90,51 +334,51 @@ message PollInboxMessagesRequest {
 message PollInboxMessagesResponse {
   // ID of the most recent message returned. Use for subsequent polling requests.
   // If no new messages are returned, it matches the `after_id` from the request.
-  int64 last_id                   = 1;
+  int64 last_id = 1;
   // Messages sorted in ascending order by id (oldest first).
-  repeated InboxMessage messages  = 2;
+  repeated InboxMessage messages = 2;
 }
 
 message InboxMessage {
   // Recipient of the message (user sub).
-  string recipient          = 1;
+  string recipient = 1;
   // ID of the message.
-  int64 id                  = 2;
+  int64 id = 2;
   // Created timestamp is the RFC3339 timestamp
   // for when the message was created.
-  string created            = 3;
+  string created = 3;
   // Creator of the message (application sub).
-  string created_by         = 4;
+  string created_by = 4;
   // Updated timestamp is the RFC3339 timestamp
   // for when the message was last updated.
-  string updated            = 5;
+  string updated = 5;
   // Indicates whether the message has been read.
-  bool is_read              = 6;
+  bool is_read = 6;
   // Payload containing a newsdoc document.
-  newsdoc.Document payload  = 7;
+  newsdoc.Document payload = 7;
 }
 
 message ListInboxMessagesRequest {
   // ID of the message before which to list messages.
-  int64 before_id   = 1;
+  int64 before_id = 1;
   // Number of messages to include in the results (defaults to 10).
-  int64 size        = 2;
+  int64 size = 2;
 }
 
 message ListInboxMessagesResponse {
   // ID of the latest message returned. Useful for subsequent polling requests.
-  int64 latest_id         = 1;
+  int64 latest_id = 1;
   // ID of the earliest message returned. Use for paginating backward.
-  int64 earliest_id       = 2;
+  int64 earliest_id = 2;
   // Messages sorted in descending order by id (newest first).
-  repeated InboxMessage messages  = 3;
+  repeated InboxMessage messages = 3;
 }
 
 message UpdateInboxMessageRequest {
   // ID of the message.
-  int64 id      = 1;
+  int64 id = 1;
   // Sets the message's read status.
-  bool is_read  = 2;
+  bool is_read = 2;
 }
 
 message UpdateInboxMessageResponse {}

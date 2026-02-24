@@ -454,6 +454,9 @@ message GetDocumentRequest {
   // the version the meta document had at the time the status was set is returned.
   // If ommited and status is not used, the latest meta document version is returned.
   int64 meta_document_version = 6;
+  // Subset returns a subset of the document as specified by a list of newsdoc
+  // value extractors.
+  repeated string subset      = 7;
 }
 
 message GetDocumentResponse {
@@ -469,11 +472,34 @@ message GetDocumentResponse {
   bool is_meta_document     = 5;
   // MainDocument is the UUID of the main document if this is a meta document.
   string main_document      = 6;
+  // Subset is the extracted subset of the document.
+  repeated ExtractedValues subset = 7;
+}
+
+message ExtractedValues {
+  // Extractor index for the the extractor that produced the values.
+  int64 extractor = 1;
+  // Values that were extracted.
+  map<string, ExtractedValue> values = 2;
+}
+
+message ExtractedValue {
+  // Value is used for extracted attributes and data values.
+  string value        = 1;
+  // Block is used for block extractors.
+  newsdoc.Block block = 2;
+  // Annotations can be used to differentiate between different extracted values.
+  string annotation   = 3;
+  // Role can be used to differentiate between different extracted values.
+  string role         = 4;
 }
 
 message BulkGetRequest {
   // Documents to get.
   repeated BulkGetReference documents = 1;
+  // Subset returns a subset of the documents as specified by a list of newsdoc
+  // value extractors.
+  repeated string subset = 2;
 }
 
 message BulkGetReference {
@@ -492,6 +518,10 @@ message BulkGetItem {
   newsdoc.Document document = 1;
   // Version is the version of the returned document.
   int64 version             = 2;
+  // UUID of the loaded document.
+  string uuid               = 3;
+  // Subset is the extracted subset of the document.
+  repeated ExtractedValues subset = 4;
 }
 
 message MetaDocument {
@@ -1145,6 +1175,8 @@ message TypeConfiguration {
   repeated TypeTimeExpression time_expressions = 2;
   // LabelExpressions are used to extract labels from documents.
   repeated LabelExpression label_expressions   = 3;
+  // Variants are the allowed variants for the document type.
+  repeated string variants                     = 4;
 }
 
 message TypeTimeExpression {

@@ -2,48 +2,88 @@
   "name": "@dimelords/elephant-api-npm",
   "private": false,
   "license": "MIT",
-  "version": "0.19.4",
+  "version": "0.21.1",
   "type": "module",
   "exports": {
     "./repository": {
-      "types": "./dist/repository/index.d.mts",
-      "import": "./dist/repository/index.mjs",
-      "require": "./dist/repository/index.cjs"
+      "import": {
+        "types": "./dist/repository/index.d.mts",
+        "default": "./dist/repository/index.mjs"
+      },
+      "require": {
+        "types": "./dist/repository/index.d.cts",
+        "default": "./dist/repository/index.cjs"
+      }
     },
     "./repositorysocket": {
-      "types": "./dist/repositorysocket/index.d.mts",
-      "import": "./dist/repositorysocket/index.mjs",
-      "require": "./dist/repositorysocket/index.cjs"
+      "import": {
+        "types": "./dist/repositorysocket/index.d.mts",
+        "default": "./dist/repositorysocket/index.mjs"
+      },
+      "require": {
+        "types": "./dist/repositorysocket/index.d.cts",
+        "default": "./dist/repositorysocket/index.cjs"
+      }
     },
     "./newsdoc": {
-      "types": "./dist/newsdoc/newsdoc.d.mts",
-      "import": "./dist/newsdoc/newsdoc.mjs",
-      "require": "./dist/newsdoc/newsdoc.cjs"
+      "import": {
+        "types": "./dist/newsdoc/newsdoc.d.mts",
+        "default": "./dist/newsdoc/newsdoc.mjs"
+      },
+      "require": {
+        "types": "./dist/newsdoc/newsdoc.d.cts",
+        "default": "./dist/newsdoc/newsdoc.cjs"
+      }
     },
     "./index": {
-      "types": "./dist/index/index.d.mts",
-      "import": "./dist/index/index.mjs",
-      "require": "./dist/index/index.cjs"
+      "import": {
+        "types": "./dist/index/index.d.mts",
+        "default": "./dist/index/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index/index.d.cts",
+        "default": "./dist/index/index.cjs"
+      }
     },
     "./spell": {
-      "types": "./dist/spell/index.d.mts",
-      "import": "./dist/spell/index.mjs",
-      "require": "./dist/spell/index.cjs"
+      "import": {
+        "types": "./dist/spell/index.d.mts",
+        "default": "./dist/spell/index.mjs"
+      },
+      "require": {
+        "types": "./dist/spell/index.d.cts",
+        "default": "./dist/spell/index.cjs"
+      }
     },
     "./user": {
-      "types": "./dist/user/index.d.mts",
-      "import": "./dist/user/index.mjs",
-      "require": "./dist/user/index.cjs"
+      "import": {
+        "types": "./dist/user/index.d.mts",
+        "default": "./dist/user/index.mjs"
+      },
+      "require": {
+        "types": "./dist/user/index.d.cts",
+        "default": "./dist/user/index.cjs"
+      }
     },
     "./replicant": {
-      "types": "./dist/replicant/index.d.mts",
-      "import": "./dist/replicant/index.mjs",
-      "require": "./dist/replicant/index.cjs"
+      "import": {
+        "types": "./dist/replicant/index.d.mts",
+        "default": "./dist/replicant/index.mjs"
+      },
+      "require": {
+        "types": "./dist/replicant/index.d.cts",
+        "default": "./dist/replicant/index.cjs"
+      }
     },
     "./genai": {
-      "types": "./dist/genai/index.d.mts",
-      "import": "./dist/genai/index.mjs",
-      "require": "./dist/genai/index.cjs"
+      "import": {
+        "types": "./dist/genai/index.d.mts",
+        "default": "./dist/genai/index.mjs"
+      },
+      "require": {
+        "types": "./dist/genai/index.d.cts",
+        "default": "./dist/genai/index.cjs"
+      }
     },
     "./package.json": "./package.json"
   },

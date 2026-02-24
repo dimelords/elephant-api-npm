@@ -3,8 +3,6 @@
 // @generated from protobuf file "user/service.proto" (package "elephant.user", syntax proto3)
 // tslint:disable
 // @ts-nocheck
-import type { RpcTransport } from "@protobuf-ts/runtime-rpc";
-import type { ServiceInfo } from "@protobuf-ts/runtime-rpc";
 import { Messages } from "./service";
 import type { DeleteInboxMessageResponse } from "./service";
 import type { DeleteInboxMessageRequest } from "./service";
@@ -18,11 +16,177 @@ import type { PollMessagesResponse } from "./service";
 import type { PollMessagesRequest } from "./service";
 import type { PushInboxMessageResponse } from "./service";
 import type { PushInboxMessageRequest } from "./service";
-import { stackIntercept } from "@protobuf-ts/runtime-rpc";
 import type { PushMessageResponse } from "./service";
 import type { PushMessageRequest } from "./service";
+import type { RpcTransport } from "@protobuf-ts/runtime-rpc";
+import type { ServiceInfo } from "@protobuf-ts/runtime-rpc";
+import { Settings } from "./service";
+import type { PollEventLogResponse } from "./service";
+import type { PollEventLogRequest } from "./service";
+import type { DeletePropertiesResponse } from "./service";
+import type { DeletePropertiesRequest } from "./service";
+import type { SetPropertiesResponse } from "./service";
+import type { SetPropertiesRequest } from "./service";
+import type { GetPropertiesResponse } from "./service";
+import type { GetPropertiesRequest } from "./service";
+import type { DeleteDocumentResponse } from "./service";
+import type { DeleteDocumentRequest } from "./service";
+import type { UpdateDocumentResponse } from "./service";
+import type { UpdateDocumentRequest } from "./service";
+import type { ListDocumentsResponse } from "./service";
+import type { ListDocumentsRequest } from "./service";
+import { stackIntercept } from "@protobuf-ts/runtime-rpc";
+import type { GetDocumentResponse } from "./service";
+import type { GetDocumentRequest } from "./service";
 import type { UnaryCall } from "@protobuf-ts/runtime-rpc";
 import type { RpcOptions } from "@protobuf-ts/runtime-rpc";
+/**
+ * Settings service manages configuration for authenticated users.
+ *
+ * All methods in this service rely on the `sub` claim from the
+ * authentication (bearer) token to identify the target user.
+ *
+ * @generated from protobuf service elephant.user.Settings
+ */
+export interface ISettingsClient {
+    /**
+     * Gets a specific document for the authenticated user.
+     *
+     * @generated from protobuf rpc: GetDocument
+     */
+    getDocument(input: GetDocumentRequest, options?: RpcOptions): UnaryCall<GetDocumentRequest, GetDocumentResponse>;
+    /**
+     * Lists documents for the authenticated user.
+     *
+     * @generated from protobuf rpc: ListDocuments
+     */
+    listDocuments(input: ListDocumentsRequest, options?: RpcOptions): UnaryCall<ListDocumentsRequest, ListDocumentsResponse>;
+    /**
+     * Updates an existing or creates a new document for the authenticated user.
+     *
+     * @generated from protobuf rpc: UpdateDocument
+     */
+    updateDocument(input: UpdateDocumentRequest, options?: RpcOptions): UnaryCall<UpdateDocumentRequest, UpdateDocumentResponse>;
+    /**
+     * Deletes a document for the authenticated user.
+     *
+     * @generated from protobuf rpc: DeleteDocument
+     */
+    deleteDocument(input: DeleteDocumentRequest, options?: RpcOptions): UnaryCall<DeleteDocumentRequest, DeleteDocumentResponse>;
+    /**
+     * Gets properties for the authenticated user.
+     *
+     * @generated from protobuf rpc: GetProperties
+     */
+    getProperties(input: GetPropertiesRequest, options?: RpcOptions): UnaryCall<GetPropertiesRequest, GetPropertiesResponse>;
+    /**
+     * Sets or updates properties for the authenticated user.
+     *
+     * @generated from protobuf rpc: SetProperties
+     */
+    setProperties(input: SetPropertiesRequest, options?: RpcOptions): UnaryCall<SetPropertiesRequest, SetPropertiesResponse>;
+    /**
+     * Deletes properties for the authenticated user.
+     *
+     * @generated from protobuf rpc: DeleteProperties
+     */
+    deleteProperties(input: DeletePropertiesRequest, options?: RpcOptions): UnaryCall<DeletePropertiesRequest, DeletePropertiesResponse>;
+    /**
+     * Polls for a stream of changes (creates, updates, deletes)
+     * for both documents and properties for the authenticated user.
+     *
+     * @generated from protobuf rpc: PollEventLog
+     */
+    pollEventLog(input: PollEventLogRequest, options?: RpcOptions): UnaryCall<PollEventLogRequest, PollEventLogResponse>;
+}
+/**
+ * Settings service manages configuration for authenticated users.
+ *
+ * All methods in this service rely on the `sub` claim from the
+ * authentication (bearer) token to identify the target user.
+ *
+ * @generated from protobuf service elephant.user.Settings
+ */
+export class SettingsClient implements ISettingsClient, ServiceInfo {
+    typeName = Settings.typeName;
+    methods = Settings.methods;
+    options = Settings.options;
+    constructor(private readonly _transport: RpcTransport) {
+    }
+    /**
+     * Gets a specific document for the authenticated user.
+     *
+     * @generated from protobuf rpc: GetDocument
+     */
+    getDocument(input: GetDocumentRequest, options?: RpcOptions): UnaryCall<GetDocumentRequest, GetDocumentResponse> {
+        const method = this.methods[0], opt = this._transport.mergeOptions(options);
+        return stackIntercept<GetDocumentRequest, GetDocumentResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Lists documents for the authenticated user.
+     *
+     * @generated from protobuf rpc: ListDocuments
+     */
+    listDocuments(input: ListDocumentsRequest, options?: RpcOptions): UnaryCall<ListDocumentsRequest, ListDocumentsResponse> {
+        const method = this.methods[1], opt = this._transport.mergeOptions(options);
+        return stackIntercept<ListDocumentsRequest, ListDocumentsResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Updates an existing or creates a new document for the authenticated user.
+     *
+     * @generated from protobuf rpc: UpdateDocument
+     */
+    updateDocument(input: UpdateDocumentRequest, options?: RpcOptions): UnaryCall<UpdateDocumentRequest, UpdateDocumentResponse> {
+        const method = this.methods[2], opt = this._transport.mergeOptions(options);
+        return stackIntercept<UpdateDocumentRequest, UpdateDocumentResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Deletes a document for the authenticated user.
+     *
+     * @generated from protobuf rpc: DeleteDocument
+     */
+    deleteDocument(input: DeleteDocumentRequest, options?: RpcOptions): UnaryCall<DeleteDocumentRequest, DeleteDocumentResponse> {
+        const method = this.methods[3], opt = this._transport.mergeOptions(options);
+        return stackIntercept<DeleteDocumentRequest, DeleteDocumentResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Gets properties for the authenticated user.
+     *
+     * @generated from protobuf rpc: GetProperties
+     */
+    getProperties(input: GetPropertiesRequest, options?: RpcOptions): UnaryCall<GetPropertiesRequest, GetPropertiesResponse> {
+        const method = this.methods[4], opt = this._transport.mergeOptions(options);
+        return stackIntercept<GetPropertiesRequest, GetPropertiesResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Sets or updates properties for the authenticated user.
+     *
+     * @generated from protobuf rpc: SetProperties
+     */
+    setProperties(input: SetPropertiesRequest, options?: RpcOptions): UnaryCall<SetPropertiesRequest, SetPropertiesResponse> {
+        const method = this.methods[5], opt = this._transport.mergeOptions(options);
+        return stackIntercept<SetPropertiesRequest, SetPropertiesResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Deletes properties for the authenticated user.
+     *
+     * @generated from protobuf rpc: DeleteProperties
+     */
+    deleteProperties(input: DeletePropertiesRequest, options?: RpcOptions): UnaryCall<DeletePropertiesRequest, DeletePropertiesResponse> {
+        const method = this.methods[6], opt = this._transport.mergeOptions(options);
+        return stackIntercept<DeletePropertiesRequest, DeletePropertiesResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Polls for a stream of changes (creates, updates, deletes)
+     * for both documents and properties for the authenticated user.
+     *
+     * @generated from protobuf rpc: PollEventLog
+     */
+    pollEventLog(input: PollEventLogRequest, options?: RpcOptions): UnaryCall<PollEventLogRequest, PollEventLogResponse> {
+        const method = this.methods[7], opt = this._transport.mergeOptions(options);
+        return stackIntercept<PollEventLogRequest, PollEventLogResponse>("unary", this._transport, method, opt, input);
+    }
+}
 /**
  * @generated from protobuf service elephant.user.Messages
  */

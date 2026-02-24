@@ -13,6 +13,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { Block } from "../newsdoc/newsdoc";
 import { Document } from "../newsdoc/newsdoc";
 /**
  * @generated from protobuf message elephant.repository.GetStatusRequest
@@ -780,6 +781,13 @@ export interface GetDocumentRequest {
      * @generated from protobuf field: int64 meta_document_version = 6
      */
     metaDocumentVersion: bigint;
+    /**
+     * Subset returns a subset of the document as specified by a list of newsdoc
+     * value extractors.
+     *
+     * @generated from protobuf field: repeated string subset = 7
+     */
+    subset: string[];
 }
 /**
  * @generated from protobuf message elephant.repository.GetDocumentResponse
@@ -821,6 +829,60 @@ export interface GetDocumentResponse {
      * @generated from protobuf field: string main_document = 6
      */
     mainDocument: string;
+    /**
+     * Subset is the extracted subset of the document.
+     *
+     * @generated from protobuf field: repeated elephant.repository.ExtractedValues subset = 7
+     */
+    subset: ExtractedValues[];
+}
+/**
+ * @generated from protobuf message elephant.repository.ExtractedValues
+ */
+export interface ExtractedValues {
+    /**
+     * Extractor index for the the extractor that produced the values.
+     *
+     * @generated from protobuf field: int64 extractor = 1
+     */
+    extractor: bigint;
+    /**
+     * Values that were extracted.
+     *
+     * @generated from protobuf field: map<string, elephant.repository.ExtractedValue> values = 2
+     */
+    values: {
+        [key: string]: ExtractedValue;
+    };
+}
+/**
+ * @generated from protobuf message elephant.repository.ExtractedValue
+ */
+export interface ExtractedValue {
+    /**
+     * Value is used for extracted attributes and data values.
+     *
+     * @generated from protobuf field: string value = 1
+     */
+    value: string;
+    /**
+     * Block is used for block extractors.
+     *
+     * @generated from protobuf field: newsdoc.Block block = 2
+     */
+    block?: Block;
+    /**
+     * Annotations can be used to differentiate between different extracted values.
+     *
+     * @generated from protobuf field: string annotation = 3
+     */
+    annotation: string;
+    /**
+     * Role can be used to differentiate between different extracted values.
+     *
+     * @generated from protobuf field: string role = 4
+     */
+    role: string;
 }
 /**
  * @generated from protobuf message elephant.repository.BulkGetRequest
@@ -832,6 +894,13 @@ export interface BulkGetRequest {
      * @generated from protobuf field: repeated elephant.repository.BulkGetReference documents = 1
      */
     documents: BulkGetReference[];
+    /**
+     * Subset returns a subset of the documents as specified by a list of newsdoc
+     * value extractors.
+     *
+     * @generated from protobuf field: repeated string subset = 2
+     */
+    subset: string[];
 }
 /**
  * @generated from protobuf message elephant.repository.BulkGetReference
@@ -875,6 +944,18 @@ export interface BulkGetItem {
      * @generated from protobuf field: int64 version = 2
      */
     version: bigint;
+    /**
+     * UUID of the loaded document.
+     *
+     * @generated from protobuf field: string uuid = 3
+     */
+    uuid: string;
+    /**
+     * Subset is the extracted subset of the document.
+     *
+     * @generated from protobuf field: repeated elephant.repository.ExtractedValues subset = 4
+     */
+    subset: ExtractedValues[];
 }
 /**
  * @generated from protobuf message elephant.repository.MetaDocument
@@ -2507,6 +2588,12 @@ export interface TypeConfiguration {
      * @generated from protobuf field: repeated elephant.repository.LabelExpression label_expressions = 3
      */
     labelExpressions: LabelExpression[];
+    /**
+     * Variants are the allowed variants for the document type.
+     *
+     * @generated from protobuf field: repeated string variants = 4
+     */
+    variants: string[];
 }
 /**
  * @generated from protobuf message elephant.repository.TypeTimeExpression
@@ -4963,7 +5050,8 @@ class GetDocumentRequest$Type extends MessageType<GetDocumentRequest> {
             { no: 3, name: "status", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 4, name: "lock", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 5, name: "meta_document", kind: "enum", T: () => ["elephant.repository.GetMetaDoc", GetMetaDoc] },
-            { no: 6, name: "meta_document_version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+            { no: 6, name: "meta_document_version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 7, name: "subset", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<GetDocumentRequest>): GetDocumentRequest {
@@ -4974,6 +5062,7 @@ class GetDocumentRequest$Type extends MessageType<GetDocumentRequest> {
         message.lock = false;
         message.metaDocument = 0;
         message.metaDocumentVersion = 0n;
+        message.subset = [];
         if (value !== undefined)
             reflectionMergePartial<GetDocumentRequest>(this, message, value);
         return message;
@@ -5000,6 +5089,9 @@ class GetDocumentRequest$Type extends MessageType<GetDocumentRequest> {
                     break;
                 case /* int64 meta_document_version */ 6:
                     message.metaDocumentVersion = reader.int64().toBigInt();
+                    break;
+                case /* repeated string subset */ 7:
+                    message.subset.push(reader.string());
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -5031,6 +5123,9 @@ class GetDocumentRequest$Type extends MessageType<GetDocumentRequest> {
         /* int64 meta_document_version = 6; */
         if (message.metaDocumentVersion !== 0n)
             writer.tag(6, WireType.Varint).int64(message.metaDocumentVersion);
+        /* repeated string subset = 7; */
+        for (let i = 0; i < message.subset.length; i++)
+            writer.tag(7, WireType.LengthDelimited).string(message.subset[i]);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -5050,7 +5145,8 @@ class GetDocumentResponse$Type extends MessageType<GetDocumentResponse> {
             { no: 3, name: "status", kind: "message", T: () => Status },
             { no: 4, name: "meta", kind: "message", T: () => MetaDocument },
             { no: 5, name: "is_meta_document", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 6, name: "main_document", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 6, name: "main_document", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "subset", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => ExtractedValues }
         ]);
     }
     create(value?: PartialMessage<GetDocumentResponse>): GetDocumentResponse {
@@ -5058,6 +5154,7 @@ class GetDocumentResponse$Type extends MessageType<GetDocumentResponse> {
         message.version = 0n;
         message.isMetaDocument = false;
         message.mainDocument = "";
+        message.subset = [];
         if (value !== undefined)
             reflectionMergePartial<GetDocumentResponse>(this, message, value);
         return message;
@@ -5084,6 +5181,9 @@ class GetDocumentResponse$Type extends MessageType<GetDocumentResponse> {
                     break;
                 case /* string main_document */ 6:
                     message.mainDocument = reader.string();
+                    break;
+                case /* repeated elephant.repository.ExtractedValues subset */ 7:
+                    message.subset.push(ExtractedValues.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -5115,6 +5215,9 @@ class GetDocumentResponse$Type extends MessageType<GetDocumentResponse> {
         /* string main_document = 6; */
         if (message.mainDocument !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.mainDocument);
+        /* repeated elephant.repository.ExtractedValues subset = 7; */
+        for (let i = 0; i < message.subset.length; i++)
+            ExtractedValues.internalBinaryWrite(message.subset[i], writer.tag(7, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -5126,15 +5229,162 @@ class GetDocumentResponse$Type extends MessageType<GetDocumentResponse> {
  */
 export const GetDocumentResponse = new GetDocumentResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class ExtractedValues$Type extends MessageType<ExtractedValues> {
+    constructor() {
+        super("elephant.repository.ExtractedValues", [
+            { no: 1, name: "extractor", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 2, name: "values", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "message", T: () => ExtractedValue } }
+        ]);
+    }
+    create(value?: PartialMessage<ExtractedValues>): ExtractedValues {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.extractor = 0n;
+        message.values = {};
+        if (value !== undefined)
+            reflectionMergePartial<ExtractedValues>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ExtractedValues): ExtractedValues {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 extractor */ 1:
+                    message.extractor = reader.int64().toBigInt();
+                    break;
+                case /* map<string, elephant.repository.ExtractedValue> values */ 2:
+                    this.binaryReadMap2(message.values, reader, options);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    private binaryReadMap2(map: ExtractedValues["values"], reader: IBinaryReader, options: BinaryReadOptions): void {
+        let len = reader.uint32(), end = reader.pos + len, key: keyof ExtractedValues["values"] | undefined, val: ExtractedValues["values"][any] | undefined;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case 1:
+                    key = reader.string();
+                    break;
+                case 2:
+                    val = ExtractedValue.internalBinaryRead(reader, reader.uint32(), options);
+                    break;
+                default: throw new globalThis.Error("unknown map entry field for elephant.repository.ExtractedValues.values");
+            }
+        }
+        map[key ?? ""] = val ?? ExtractedValue.create();
+    }
+    internalBinaryWrite(message: ExtractedValues, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 extractor = 1; */
+        if (message.extractor !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.extractor);
+        /* map<string, elephant.repository.ExtractedValue> values = 2; */
+        for (let k of globalThis.Object.keys(message.values)) {
+            writer.tag(2, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k);
+            writer.tag(2, WireType.LengthDelimited).fork();
+            ExtractedValue.internalBinaryWrite(message.values[k], writer, options);
+            writer.join().join();
+        }
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repository.ExtractedValues
+ */
+export const ExtractedValues = new ExtractedValues$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ExtractedValue$Type extends MessageType<ExtractedValue> {
+    constructor() {
+        super("elephant.repository.ExtractedValue", [
+            { no: 1, name: "value", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "block", kind: "message", T: () => Block },
+            { no: 3, name: "annotation", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "role", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ExtractedValue>): ExtractedValue {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.value = "";
+        message.annotation = "";
+        message.role = "";
+        if (value !== undefined)
+            reflectionMergePartial<ExtractedValue>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ExtractedValue): ExtractedValue {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string value */ 1:
+                    message.value = reader.string();
+                    break;
+                case /* newsdoc.Block block */ 2:
+                    message.block = Block.internalBinaryRead(reader, reader.uint32(), options, message.block);
+                    break;
+                case /* string annotation */ 3:
+                    message.annotation = reader.string();
+                    break;
+                case /* string role */ 4:
+                    message.role = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ExtractedValue, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string value = 1; */
+        if (message.value !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.value);
+        /* newsdoc.Block block = 2; */
+        if (message.block)
+            Block.internalBinaryWrite(message.block, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* string annotation = 3; */
+        if (message.annotation !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.annotation);
+        /* string role = 4; */
+        if (message.role !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.role);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repository.ExtractedValue
+ */
+export const ExtractedValue = new ExtractedValue$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class BulkGetRequest$Type extends MessageType<BulkGetRequest> {
     constructor() {
         super("elephant.repository.BulkGetRequest", [
-            { no: 1, name: "documents", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => BulkGetReference }
+            { no: 1, name: "documents", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => BulkGetReference },
+            { no: 2, name: "subset", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<BulkGetRequest>): BulkGetRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.documents = [];
+        message.subset = [];
         if (value !== undefined)
             reflectionMergePartial<BulkGetRequest>(this, message, value);
         return message;
@@ -5146,6 +5396,9 @@ class BulkGetRequest$Type extends MessageType<BulkGetRequest> {
             switch (fieldNo) {
                 case /* repeated elephant.repository.BulkGetReference documents */ 1:
                     message.documents.push(BulkGetReference.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* repeated string subset */ 2:
+                    message.subset.push(reader.string());
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -5162,6 +5415,9 @@ class BulkGetRequest$Type extends MessageType<BulkGetRequest> {
         /* repeated elephant.repository.BulkGetReference documents = 1; */
         for (let i = 0; i < message.documents.length; i++)
             BulkGetReference.internalBinaryWrite(message.documents[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* repeated string subset = 2; */
+        for (let i = 0; i < message.subset.length; i++)
+            writer.tag(2, WireType.LengthDelimited).string(message.subset[i]);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -5279,12 +5535,16 @@ class BulkGetItem$Type extends MessageType<BulkGetItem> {
     constructor() {
         super("elephant.repository.BulkGetItem", [
             { no: 1, name: "document", kind: "message", T: () => Document },
-            { no: 2, name: "version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+            { no: 2, name: "version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 3, name: "uuid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "subset", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => ExtractedValues }
         ]);
     }
     create(value?: PartialMessage<BulkGetItem>): BulkGetItem {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.version = 0n;
+        message.uuid = "";
+        message.subset = [];
         if (value !== undefined)
             reflectionMergePartial<BulkGetItem>(this, message, value);
         return message;
@@ -5299,6 +5559,12 @@ class BulkGetItem$Type extends MessageType<BulkGetItem> {
                     break;
                 case /* int64 version */ 2:
                     message.version = reader.int64().toBigInt();
+                    break;
+                case /* string uuid */ 3:
+                    message.uuid = reader.string();
+                    break;
+                case /* repeated elephant.repository.ExtractedValues subset */ 4:
+                    message.subset.push(ExtractedValues.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -5318,6 +5584,12 @@ class BulkGetItem$Type extends MessageType<BulkGetItem> {
         /* int64 version = 2; */
         if (message.version !== 0n)
             writer.tag(2, WireType.Varint).int64(message.version);
+        /* string uuid = 3; */
+        if (message.uuid !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.uuid);
+        /* repeated elephant.repository.ExtractedValues subset = 4; */
+        for (let i = 0; i < message.subset.length; i++)
+            ExtractedValues.internalBinaryWrite(message.subset[i], writer.tag(4, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -10503,7 +10775,8 @@ class TypeConfiguration$Type extends MessageType<TypeConfiguration> {
         super("elephant.repository.TypeConfiguration", [
             { no: 1, name: "bounded_collection", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 2, name: "time_expressions", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => TypeTimeExpression },
-            { no: 3, name: "label_expressions", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => LabelExpression }
+            { no: 3, name: "label_expressions", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => LabelExpression },
+            { no: 4, name: "variants", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<TypeConfiguration>): TypeConfiguration {
@@ -10511,6 +10784,7 @@ class TypeConfiguration$Type extends MessageType<TypeConfiguration> {
         message.boundedCollection = false;
         message.timeExpressions = [];
         message.labelExpressions = [];
+        message.variants = [];
         if (value !== undefined)
             reflectionMergePartial<TypeConfiguration>(this, message, value);
         return message;
@@ -10528,6 +10802,9 @@ class TypeConfiguration$Type extends MessageType<TypeConfiguration> {
                     break;
                 case /* repeated elephant.repository.LabelExpression label_expressions */ 3:
                     message.labelExpressions.push(LabelExpression.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* repeated string variants */ 4:
+                    message.variants.push(reader.string());
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -10550,6 +10827,9 @@ class TypeConfiguration$Type extends MessageType<TypeConfiguration> {
         /* repeated elephant.repository.LabelExpression label_expressions = 3; */
         for (let i = 0; i < message.labelExpressions.length; i++)
             LabelExpression.internalBinaryWrite(message.labelExpressions[i], writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+        /* repeated string variants = 4; */
+        for (let i = 0; i < message.variants.length; i++)
+            writer.tag(4, WireType.LengthDelimited).string(message.variants[i]);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

@@ -13,7 +13,495 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
-import { Document } from "../newsdoc/newsdoc";
+import { Document as Document$ } from "../newsdoc/newsdoc";
+/**
+ * @generated from protobuf message elephant.user.GetDocumentRequest
+ */
+export interface GetDocumentRequest {
+    /**
+     * URI of the document owner. Optional, defaults to the caller URI (`sub` claim).
+     * Can be a user, unit or organization. (e.g., core://user/1234, core://unit/abc, core://org/ab)
+     *
+     * @generated from protobuf field: string owner = 1
+     */
+    owner: string;
+    /**
+     * The unique application identifier in reverse domain notation
+     * (e.g., `com.example.assignments` or `com.example.writer`).
+     *
+     * @generated from protobuf field: string application = 2
+     */
+    application: string;
+    /**
+     * Type is the content type of the document.
+     *
+     * @generated from protobuf field: string type = 3
+     */
+    type: string;
+    /**
+     * Unique identifier for the document within the scope of the application and type.
+     * Can be a human readable slug or a UUID.
+     *
+     * @generated from protobuf field: string key = 4
+     */
+    key: string;
+}
+/**
+ * @generated from protobuf message elephant.user.GetDocumentResponse
+ */
+export interface GetDocumentResponse {
+    /**
+     * @generated from protobuf field: elephant.user.Document document = 1
+     */
+    document?: Document;
+}
+/**
+ * @generated from protobuf message elephant.user.Document
+ */
+export interface Document {
+    /**
+     * URI of the document owner.
+     *
+     * @generated from protobuf field: string owner = 1
+     */
+    owner: string;
+    /**
+     * The unique application identifier in reverse domain notation
+     * (e.g., `com.example.assignments` or `com.example.writer`).
+     *
+     * @generated from protobuf field: string application = 2
+     */
+    application: string;
+    /**
+     * Type is the content type of the document.
+     *
+     * @generated from protobuf field: string type = 3
+     */
+    type: string;
+    /**
+     * Unique identifier for the document within the scope of the application and type.
+     * Can be a human readable slug or a UUID.
+     *
+     * @generated from protobuf field: string key = 4
+     */
+    key: string;
+    /**
+     * Version of the document.
+     *
+     * @generated from protobuf field: int64 version = 5
+     */
+    version: bigint;
+    /**
+     * Semver string indicating the schema version of the payload.
+     *
+     * @generated from protobuf field: string schema_version = 6
+     */
+    schemaVersion: string;
+    /**
+     * ReadOnly is set to true if the document is shared.
+     *
+     * @generated from protobuf field: bool read_only = 7
+     */
+    readOnly: boolean;
+    /**
+     * Title of the document.
+     *
+     * @generated from protobuf field: string title = 8
+     */
+    title: string;
+    /**
+     * Creation time in RFC3339 format.
+     *
+     * @generated from protobuf field: string created = 9
+     */
+    created: string;
+    /**
+     * Last update time in RFC3339 format.
+     *
+     * @generated from protobuf field: string updated = 10
+     */
+    updated: string;
+    /**
+     * UpdatedBy is the identity of the party that last updated the document.
+     *
+     * @generated from protobuf field: string updated_by = 11
+     */
+    updatedBy: string;
+    /**
+     * Payload contains a newsdoc document with actual configuration data.
+     *
+     * @generated from protobuf field: newsdoc.Document payload = 12
+     */
+    payload?: Document$;
+}
+/**
+ * @generated from protobuf message elephant.user.ListDocumentsRequest
+ */
+export interface ListDocumentsRequest {
+    /**
+     * The unique application identifier in reverse domain notation
+     * (e.g., `com.example.assignments` or `com.example.writer`).
+     * If empty, returns documents across all applications.
+     *
+     * @generated from protobuf field: string application = 1
+     */
+    application: string;
+    /**
+     * Type is the content type of the document.
+     * If provided, filters documents by type.
+     * If `application` is empty, returns documents of this type across all applications.
+     *
+     * @generated from protobuf field: string type = 2
+     */
+    type: string;
+    /**
+     * If true, include the document payload in the response.
+     * If false (default), payload will be omitted.
+     *
+     * @generated from protobuf field: bool include_payload = 3
+     */
+    includePayload: boolean;
+}
+/**
+ * @generated from protobuf message elephant.user.ListDocumentsResponse
+ */
+export interface ListDocumentsResponse {
+    /**
+     * @generated from protobuf field: repeated elephant.user.Document documents = 1
+     */
+    documents: Document[];
+}
+/**
+ * @generated from protobuf message elephant.user.UpdateDocumentRequest
+ */
+export interface UpdateDocumentRequest {
+    /**
+     * URI of the document owner. Optional, defaults to the caller URI (`sub` claim).
+     * Can be a user, unit or organization. (e.g., core://user/1234, core://unit/abc, core://org/ab)
+     * Only admin users can set it to a unit or organization.
+     *
+     * @generated from protobuf field: string owner = 1
+     */
+    owner: string;
+    /**
+     * The unique application identifier in reverse domain notation
+     * (e.g., `com.example.assignments` or `com.example.writer`).
+     *
+     * @generated from protobuf field: string application = 2
+     */
+    application: string;
+    /**
+     * Type is the content type of the document.
+     *
+     * @generated from protobuf field: string type = 3
+     */
+    type: string;
+    /**
+     * Unique identifier for the document within the scope of the application and type.
+     * Can be a human readable slug or a UUID.
+     *
+     * @generated from protobuf field: string key = 4
+     */
+    key: string;
+    /**
+     * Semver string indicating the schema version of the payload.
+     *
+     * @generated from protobuf field: string schema_version = 5
+     */
+    schemaVersion: string;
+    /**
+     * Payload contains a newsdoc document with actual configuration data.
+     *
+     * @generated from protobuf field: newsdoc.Document payload = 6
+     */
+    payload?: Document$;
+}
+/**
+ * @generated from protobuf message elephant.user.UpdateDocumentResponse
+ */
+export interface UpdateDocumentResponse {
+}
+/**
+ * @generated from protobuf message elephant.user.DeleteDocumentRequest
+ */
+export interface DeleteDocumentRequest {
+    /**
+     * URI of the document owner. If omitted, defaults to the caller URI (`sub` claim).
+     * Can be a user, unit or organization. (e.g., core://user/1234, core://unit/abc, core://org/ab)
+     * Only admin users can delete documents owned by a unit or organization.
+     *
+     * @generated from protobuf field: string owner = 1
+     */
+    owner: string;
+    /**
+     * The unique application identifier in reverse domain notation
+     * (e.g., `com.example.assignments` or `com.example.writer`).
+     *
+     * @generated from protobuf field: string application = 2
+     */
+    application: string;
+    /**
+     * Type is the content type of the document.
+     *
+     * @generated from protobuf field: string type = 3
+     */
+    type: string;
+    /**
+     * Unique identifier for the document within the scope of the application and type.
+     * Can be a human readable slug or a UUID.
+     *
+     * @generated from protobuf field: string key = 4
+     */
+    key: string;
+}
+/**
+ * @generated from protobuf message elephant.user.DeleteDocumentResponse
+ */
+export interface DeleteDocumentResponse {
+}
+/**
+ * Property represents a generic key-value pair attached to a user.
+ * It can be used for preferences, user state, feature flags etc.
+ *
+ * @generated from protobuf message elephant.user.Property
+ */
+export interface Property {
+    /**
+     * URI of the property owner. Matches the caller `sub` claim.
+     *
+     * @generated from protobuf field: string owner = 1
+     */
+    owner: string;
+    /**
+     * The unique application identifier in reverse domain notation
+     * (e.g., `com.example.assignments` or `com.example.writer`).
+     *
+     * @generated from protobuf field: string application = 2
+     */
+    application: string;
+    /**
+     * Unique identifier for the property within the application.
+     *
+     * @generated from protobuf field: string key = 3
+     */
+    key: string;
+    /**
+     * The value serialized as a string.
+     *
+     * @generated from protobuf field: string value = 4
+     */
+    value: string;
+    /**
+     * Creation time in RFC3339 format.
+     *
+     * @generated from protobuf field: string created = 5
+     */
+    created: string;
+    /**
+     * Last update time in RFC3339 format.
+     *
+     * @generated from protobuf field: string updated = 6
+     */
+    updated: string;
+}
+/**
+ * @generated from protobuf message elephant.user.GetPropertiesRequest
+ */
+export interface GetPropertiesRequest {
+    /**
+     * The unique application identifier in reverse domain notation
+     * (e.g., `com.example.assignments` or `com.example.writer`).
+     * If empty, returns properties across all applications.
+     *
+     * @generated from protobuf field: string application = 1
+     */
+    application: string;
+    /**
+     * Unique identifier(s) for the property.
+     * If provided, filters properties by key.
+     * If `application` is empty, returns properties with these keys across all applications.
+     *
+     * @generated from protobuf field: repeated string keys = 2
+     */
+    keys: string[];
+}
+/**
+ * @generated from protobuf message elephant.user.GetPropertiesResponse
+ */
+export interface GetPropertiesResponse {
+    /**
+     * @generated from protobuf field: repeated elephant.user.Property properties = 1
+     */
+    properties: Property[];
+}
+/**
+ * @generated from protobuf message elephant.user.PropertyUpdate
+ */
+export interface PropertyUpdate {
+    /**
+     * The unique application identifier in reverse domain notation
+     * (e.g., `com.example.assignments` or `com.example.writer`).
+     *
+     * @generated from protobuf field: string application = 1
+     */
+    application: string;
+    /**
+     * Unique identifier for the property within the application.
+     *
+     * @generated from protobuf field: string key = 2
+     */
+    key: string;
+    /**
+     * The value serialized as a string.
+     *
+     * @generated from protobuf field: string value = 3
+     */
+    value: string;
+}
+/**
+ * @generated from protobuf message elephant.user.SetPropertiesRequest
+ */
+export interface SetPropertiesRequest {
+    /**
+     * @generated from protobuf field: repeated elephant.user.PropertyUpdate properties = 1
+     */
+    properties: PropertyUpdate[];
+}
+/**
+ * @generated from protobuf message elephant.user.SetPropertiesResponse
+ */
+export interface SetPropertiesResponse {
+}
+/**
+ * @generated from protobuf message elephant.user.PropertyDelete
+ */
+export interface PropertyDelete {
+    /**
+     * The unique application identifier in reverse domain notation
+     * (e.g., `com.example.assignments` or `com.example.writer`).
+     *
+     * @generated from protobuf field: string application = 1
+     */
+    application: string;
+    /**
+     * Unique identifier for the property within the application.
+     *
+     * @generated from protobuf field: string key = 2
+     */
+    key: string;
+}
+/**
+ * @generated from protobuf message elephant.user.DeletePropertiesRequest
+ */
+export interface DeletePropertiesRequest {
+    /**
+     * @generated from protobuf field: repeated elephant.user.PropertyDelete properties = 1
+     */
+    properties: PropertyDelete[];
+}
+/**
+ * @generated from protobuf message elephant.user.DeletePropertiesResponse
+ */
+export interface DeletePropertiesResponse {
+}
+/**
+ * @generated from protobuf message elephant.user.PollEventLogRequest
+ */
+export interface PollEventLogRequest {
+    /**
+     * ID of the event after which to start returning events.
+     * Set to -1 for the initial request.
+     *
+     * @generated from protobuf field: int64 after_id = 1
+     */
+    afterId: bigint;
+}
+/**
+ * @generated from protobuf message elephant.user.PollEventLogResponse
+ */
+export interface PollEventLogResponse {
+    /**
+     * ID of the most recent event returned. Use for subsequent polling requests.
+     * If no new events are returned, it matches the `after_id` from the request.
+     *
+     * @generated from protobuf field: int64 last_id = 1
+     */
+    lastId: bigint;
+    /**
+     * Event log items sorted in ascending order by id (oldest first).
+     *
+     * @generated from protobuf field: repeated elephant.user.EventLogEntry entries = 2
+     */
+    entries: EventLogEntry[];
+}
+/**
+ * @generated from protobuf message elephant.user.EventLogEntry
+ */
+export interface EventLogEntry {
+    /**
+     * ID of the event.
+     *
+     * @generated from protobuf field: int64 id = 1
+     */
+    id: bigint;
+    /**
+     * ID of the resource owner. Can be a user, unit or organization.
+     * (e.g., core://user/1234, core://unit/abc, core://org/ab)
+     *
+     * @generated from protobuf field: string owner = 2
+     */
+    owner: string;
+    /**
+     * The type of change.
+     *
+     * @generated from protobuf field: elephant.user.EventLogEntryType type = 3
+     */
+    type: EventLogEntryType;
+    /**
+     * Kind of the resource.
+     *
+     * @generated from protobuf field: elephant.user.ResourceKind kind = 4
+     */
+    kind: ResourceKind;
+    /**
+     * The unique application identifier in reverse domain notation
+     * (e.g., `com.example.assignments` or `com.example.writer`).
+     *
+     * @generated from protobuf field: string application = 5
+     */
+    application: string;
+    /**
+     * DocumentType is the content type of the document.
+     *
+     * @generated from protobuf field: string document_type = 6
+     */
+    documentType: string;
+    /**
+     * Unique identifier for a resource within the scope of the owner and
+     * application (and document type when kind is `RESOURCE_KIND_DOCUMENT`).
+     *
+     * @generated from protobuf field: string key = 7
+     */
+    key: string;
+    /**
+     * Version of the document.
+     *
+     * @generated from protobuf field: int64 version = 8
+     */
+    version: bigint;
+    /**
+     * UpdatedBy is the identity of the party that last updated the resource.
+     *
+     * @generated from protobuf field: string updated_by = 9
+     */
+    updatedBy: string;
+    /**
+     * Occurrence time in RFC3339 format.
+     *
+     * @generated from protobuf field: string created = 10
+     */
+    created: string;
+}
 /**
  * @generated from protobuf message elephant.user.PushMessageRequest
  */
@@ -71,7 +559,7 @@ export interface PushInboxMessageRequest {
      *
      * @generated from protobuf field: newsdoc.Document payload = 2
      */
-    payload?: Document;
+    payload?: Document$;
 }
 /**
  * @generated from protobuf message elephant.user.PushInboxMessageResponse
@@ -241,7 +729,7 @@ export interface InboxMessage {
      *
      * @generated from protobuf field: newsdoc.Document payload = 7
      */
-    payload?: Document;
+    payload?: Document$;
 }
 /**
  * @generated from protobuf message elephant.user.ListInboxMessagesRequest
@@ -321,6 +809,1332 @@ export interface DeleteInboxMessageRequest {
  */
 export interface DeleteInboxMessageResponse {
 }
+/**
+ * @generated from protobuf enum elephant.user.EventLogEntryType
+ */
+export enum EventLogEntryType {
+    /**
+     * @generated from protobuf enum value: EVENT_LOG_ENTRY_UNSPECIFIED = 0;
+     */
+    EVENT_LOG_ENTRY_UNSPECIFIED = 0,
+    /**
+     * @generated from protobuf enum value: EVENT_LOG_ENTRY_UPDATE = 1;
+     */
+    EVENT_LOG_ENTRY_UPDATE = 1,
+    /**
+     * @generated from protobuf enum value: EVENT_LOG_ENTRY_DELETE = 2;
+     */
+    EVENT_LOG_ENTRY_DELETE = 2
+}
+/**
+ * @generated from protobuf enum elephant.user.ResourceKind
+ */
+export enum ResourceKind {
+    /**
+     * @generated from protobuf enum value: RESOURCE_KIND_UNSPECIFIED = 0;
+     */
+    UNSPECIFIED = 0,
+    /**
+     * @generated from protobuf enum value: RESOURCE_KIND_DOCUMENT = 1;
+     */
+    DOCUMENT = 1,
+    /**
+     * @generated from protobuf enum value: RESOURCE_KIND_PROPERTY = 2;
+     */
+    PROPERTY = 2
+}
+// @generated message type with reflection information, may provide speed optimized methods
+class GetDocumentRequest$Type extends MessageType<GetDocumentRequest> {
+    constructor() {
+        super("elephant.user.GetDocumentRequest", [
+            { no: 1, name: "owner", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "application", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetDocumentRequest>): GetDocumentRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.owner = "";
+        message.application = "";
+        message.type = "";
+        message.key = "";
+        if (value !== undefined)
+            reflectionMergePartial<GetDocumentRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetDocumentRequest): GetDocumentRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string owner */ 1:
+                    message.owner = reader.string();
+                    break;
+                case /* string application */ 2:
+                    message.application = reader.string();
+                    break;
+                case /* string type */ 3:
+                    message.type = reader.string();
+                    break;
+                case /* string key */ 4:
+                    message.key = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetDocumentRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string owner = 1; */
+        if (message.owner !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.owner);
+        /* string application = 2; */
+        if (message.application !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.application);
+        /* string type = 3; */
+        if (message.type !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.type);
+        /* string key = 4; */
+        if (message.key !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.key);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.GetDocumentRequest
+ */
+export const GetDocumentRequest = new GetDocumentRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetDocumentResponse$Type extends MessageType<GetDocumentResponse> {
+    constructor() {
+        super("elephant.user.GetDocumentResponse", [
+            { no: 1, name: "document", kind: "message", T: () => Document }
+        ]);
+    }
+    create(value?: PartialMessage<GetDocumentResponse>): GetDocumentResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<GetDocumentResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetDocumentResponse): GetDocumentResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* elephant.user.Document document */ 1:
+                    message.document = Document.internalBinaryRead(reader, reader.uint32(), options, message.document);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetDocumentResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* elephant.user.Document document = 1; */
+        if (message.document)
+            Document.internalBinaryWrite(message.document, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.GetDocumentResponse
+ */
+export const GetDocumentResponse = new GetDocumentResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Document$Type extends MessageType<Document> {
+    constructor() {
+        super("elephant.user.Document", [
+            { no: 1, name: "owner", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "application", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 6, name: "schema_version", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "read_only", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 8, name: "title", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 9, name: "created", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 10, name: "updated", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 11, name: "updated_by", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 12, name: "payload", kind: "message", T: () => Document$ }
+        ]);
+    }
+    create(value?: PartialMessage<Document>): Document {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.owner = "";
+        message.application = "";
+        message.type = "";
+        message.key = "";
+        message.version = 0n;
+        message.schemaVersion = "";
+        message.readOnly = false;
+        message.title = "";
+        message.created = "";
+        message.updated = "";
+        message.updatedBy = "";
+        if (value !== undefined)
+            reflectionMergePartial<Document>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Document): Document {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string owner */ 1:
+                    message.owner = reader.string();
+                    break;
+                case /* string application */ 2:
+                    message.application = reader.string();
+                    break;
+                case /* string type */ 3:
+                    message.type = reader.string();
+                    break;
+                case /* string key */ 4:
+                    message.key = reader.string();
+                    break;
+                case /* int64 version */ 5:
+                    message.version = reader.int64().toBigInt();
+                    break;
+                case /* string schema_version */ 6:
+                    message.schemaVersion = reader.string();
+                    break;
+                case /* bool read_only */ 7:
+                    message.readOnly = reader.bool();
+                    break;
+                case /* string title */ 8:
+                    message.title = reader.string();
+                    break;
+                case /* string created */ 9:
+                    message.created = reader.string();
+                    break;
+                case /* string updated */ 10:
+                    message.updated = reader.string();
+                    break;
+                case /* string updated_by */ 11:
+                    message.updatedBy = reader.string();
+                    break;
+                case /* newsdoc.Document payload */ 12:
+                    message.payload = Document$.internalBinaryRead(reader, reader.uint32(), options, message.payload);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Document, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string owner = 1; */
+        if (message.owner !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.owner);
+        /* string application = 2; */
+        if (message.application !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.application);
+        /* string type = 3; */
+        if (message.type !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.type);
+        /* string key = 4; */
+        if (message.key !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.key);
+        /* int64 version = 5; */
+        if (message.version !== 0n)
+            writer.tag(5, WireType.Varint).int64(message.version);
+        /* string schema_version = 6; */
+        if (message.schemaVersion !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.schemaVersion);
+        /* bool read_only = 7; */
+        if (message.readOnly !== false)
+            writer.tag(7, WireType.Varint).bool(message.readOnly);
+        /* string title = 8; */
+        if (message.title !== "")
+            writer.tag(8, WireType.LengthDelimited).string(message.title);
+        /* string created = 9; */
+        if (message.created !== "")
+            writer.tag(9, WireType.LengthDelimited).string(message.created);
+        /* string updated = 10; */
+        if (message.updated !== "")
+            writer.tag(10, WireType.LengthDelimited).string(message.updated);
+        /* string updated_by = 11; */
+        if (message.updatedBy !== "")
+            writer.tag(11, WireType.LengthDelimited).string(message.updatedBy);
+        /* newsdoc.Document payload = 12; */
+        if (message.payload)
+            Document$.internalBinaryWrite(message.payload, writer.tag(12, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.Document
+ */
+export const Document = new Document$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ListDocumentsRequest$Type extends MessageType<ListDocumentsRequest> {
+    constructor() {
+        super("elephant.user.ListDocumentsRequest", [
+            { no: 1, name: "application", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "include_payload", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ListDocumentsRequest>): ListDocumentsRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.application = "";
+        message.type = "";
+        message.includePayload = false;
+        if (value !== undefined)
+            reflectionMergePartial<ListDocumentsRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ListDocumentsRequest): ListDocumentsRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string application */ 1:
+                    message.application = reader.string();
+                    break;
+                case /* string type */ 2:
+                    message.type = reader.string();
+                    break;
+                case /* bool include_payload */ 3:
+                    message.includePayload = reader.bool();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ListDocumentsRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string application = 1; */
+        if (message.application !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.application);
+        /* string type = 2; */
+        if (message.type !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.type);
+        /* bool include_payload = 3; */
+        if (message.includePayload !== false)
+            writer.tag(3, WireType.Varint).bool(message.includePayload);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.ListDocumentsRequest
+ */
+export const ListDocumentsRequest = new ListDocumentsRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ListDocumentsResponse$Type extends MessageType<ListDocumentsResponse> {
+    constructor() {
+        super("elephant.user.ListDocumentsResponse", [
+            { no: 1, name: "documents", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Document }
+        ]);
+    }
+    create(value?: PartialMessage<ListDocumentsResponse>): ListDocumentsResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.documents = [];
+        if (value !== undefined)
+            reflectionMergePartial<ListDocumentsResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ListDocumentsResponse): ListDocumentsResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated elephant.user.Document documents */ 1:
+                    message.documents.push(Document.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ListDocumentsResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated elephant.user.Document documents = 1; */
+        for (let i = 0; i < message.documents.length; i++)
+            Document.internalBinaryWrite(message.documents[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.ListDocumentsResponse
+ */
+export const ListDocumentsResponse = new ListDocumentsResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class UpdateDocumentRequest$Type extends MessageType<UpdateDocumentRequest> {
+    constructor() {
+        super("elephant.user.UpdateDocumentRequest", [
+            { no: 1, name: "owner", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "application", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "schema_version", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "payload", kind: "message", T: () => Document$ }
+        ]);
+    }
+    create(value?: PartialMessage<UpdateDocumentRequest>): UpdateDocumentRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.owner = "";
+        message.application = "";
+        message.type = "";
+        message.key = "";
+        message.schemaVersion = "";
+        if (value !== undefined)
+            reflectionMergePartial<UpdateDocumentRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: UpdateDocumentRequest): UpdateDocumentRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string owner */ 1:
+                    message.owner = reader.string();
+                    break;
+                case /* string application */ 2:
+                    message.application = reader.string();
+                    break;
+                case /* string type */ 3:
+                    message.type = reader.string();
+                    break;
+                case /* string key */ 4:
+                    message.key = reader.string();
+                    break;
+                case /* string schema_version */ 5:
+                    message.schemaVersion = reader.string();
+                    break;
+                case /* newsdoc.Document payload */ 6:
+                    message.payload = Document$.internalBinaryRead(reader, reader.uint32(), options, message.payload);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: UpdateDocumentRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string owner = 1; */
+        if (message.owner !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.owner);
+        /* string application = 2; */
+        if (message.application !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.application);
+        /* string type = 3; */
+        if (message.type !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.type);
+        /* string key = 4; */
+        if (message.key !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.key);
+        /* string schema_version = 5; */
+        if (message.schemaVersion !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.schemaVersion);
+        /* newsdoc.Document payload = 6; */
+        if (message.payload)
+            Document$.internalBinaryWrite(message.payload, writer.tag(6, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.UpdateDocumentRequest
+ */
+export const UpdateDocumentRequest = new UpdateDocumentRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class UpdateDocumentResponse$Type extends MessageType<UpdateDocumentResponse> {
+    constructor() {
+        super("elephant.user.UpdateDocumentResponse", []);
+    }
+    create(value?: PartialMessage<UpdateDocumentResponse>): UpdateDocumentResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<UpdateDocumentResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: UpdateDocumentResponse): UpdateDocumentResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: UpdateDocumentResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.UpdateDocumentResponse
+ */
+export const UpdateDocumentResponse = new UpdateDocumentResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeleteDocumentRequest$Type extends MessageType<DeleteDocumentRequest> {
+    constructor() {
+        super("elephant.user.DeleteDocumentRequest", [
+            { no: 1, name: "owner", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "application", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<DeleteDocumentRequest>): DeleteDocumentRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.owner = "";
+        message.application = "";
+        message.type = "";
+        message.key = "";
+        if (value !== undefined)
+            reflectionMergePartial<DeleteDocumentRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteDocumentRequest): DeleteDocumentRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string owner */ 1:
+                    message.owner = reader.string();
+                    break;
+                case /* string application */ 2:
+                    message.application = reader.string();
+                    break;
+                case /* string type */ 3:
+                    message.type = reader.string();
+                    break;
+                case /* string key */ 4:
+                    message.key = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeleteDocumentRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string owner = 1; */
+        if (message.owner !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.owner);
+        /* string application = 2; */
+        if (message.application !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.application);
+        /* string type = 3; */
+        if (message.type !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.type);
+        /* string key = 4; */
+        if (message.key !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.key);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.DeleteDocumentRequest
+ */
+export const DeleteDocumentRequest = new DeleteDocumentRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeleteDocumentResponse$Type extends MessageType<DeleteDocumentResponse> {
+    constructor() {
+        super("elephant.user.DeleteDocumentResponse", []);
+    }
+    create(value?: PartialMessage<DeleteDocumentResponse>): DeleteDocumentResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<DeleteDocumentResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteDocumentResponse): DeleteDocumentResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeleteDocumentResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.DeleteDocumentResponse
+ */
+export const DeleteDocumentResponse = new DeleteDocumentResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Property$Type extends MessageType<Property> {
+    constructor() {
+        super("elephant.user.Property", [
+            { no: 1, name: "owner", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "application", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "value", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "created", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "updated", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Property>): Property {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.owner = "";
+        message.application = "";
+        message.key = "";
+        message.value = "";
+        message.created = "";
+        message.updated = "";
+        if (value !== undefined)
+            reflectionMergePartial<Property>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Property): Property {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string owner */ 1:
+                    message.owner = reader.string();
+                    break;
+                case /* string application */ 2:
+                    message.application = reader.string();
+                    break;
+                case /* string key */ 3:
+                    message.key = reader.string();
+                    break;
+                case /* string value */ 4:
+                    message.value = reader.string();
+                    break;
+                case /* string created */ 5:
+                    message.created = reader.string();
+                    break;
+                case /* string updated */ 6:
+                    message.updated = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Property, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string owner = 1; */
+        if (message.owner !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.owner);
+        /* string application = 2; */
+        if (message.application !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.application);
+        /* string key = 3; */
+        if (message.key !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.key);
+        /* string value = 4; */
+        if (message.value !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.value);
+        /* string created = 5; */
+        if (message.created !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.created);
+        /* string updated = 6; */
+        if (message.updated !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.updated);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.Property
+ */
+export const Property = new Property$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetPropertiesRequest$Type extends MessageType<GetPropertiesRequest> {
+    constructor() {
+        super("elephant.user.GetPropertiesRequest", [
+            { no: 1, name: "application", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "keys", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetPropertiesRequest>): GetPropertiesRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.application = "";
+        message.keys = [];
+        if (value !== undefined)
+            reflectionMergePartial<GetPropertiesRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetPropertiesRequest): GetPropertiesRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string application */ 1:
+                    message.application = reader.string();
+                    break;
+                case /* repeated string keys */ 2:
+                    message.keys.push(reader.string());
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetPropertiesRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string application = 1; */
+        if (message.application !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.application);
+        /* repeated string keys = 2; */
+        for (let i = 0; i < message.keys.length; i++)
+            writer.tag(2, WireType.LengthDelimited).string(message.keys[i]);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.GetPropertiesRequest
+ */
+export const GetPropertiesRequest = new GetPropertiesRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetPropertiesResponse$Type extends MessageType<GetPropertiesResponse> {
+    constructor() {
+        super("elephant.user.GetPropertiesResponse", [
+            { no: 1, name: "properties", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Property }
+        ]);
+    }
+    create(value?: PartialMessage<GetPropertiesResponse>): GetPropertiesResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.properties = [];
+        if (value !== undefined)
+            reflectionMergePartial<GetPropertiesResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetPropertiesResponse): GetPropertiesResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated elephant.user.Property properties */ 1:
+                    message.properties.push(Property.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetPropertiesResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated elephant.user.Property properties = 1; */
+        for (let i = 0; i < message.properties.length; i++)
+            Property.internalBinaryWrite(message.properties[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.GetPropertiesResponse
+ */
+export const GetPropertiesResponse = new GetPropertiesResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class PropertyUpdate$Type extends MessageType<PropertyUpdate> {
+    constructor() {
+        super("elephant.user.PropertyUpdate", [
+            { no: 1, name: "application", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "value", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<PropertyUpdate>): PropertyUpdate {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.application = "";
+        message.key = "";
+        message.value = "";
+        if (value !== undefined)
+            reflectionMergePartial<PropertyUpdate>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PropertyUpdate): PropertyUpdate {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string application */ 1:
+                    message.application = reader.string();
+                    break;
+                case /* string key */ 2:
+                    message.key = reader.string();
+                    break;
+                case /* string value */ 3:
+                    message.value = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: PropertyUpdate, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string application = 1; */
+        if (message.application !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.application);
+        /* string key = 2; */
+        if (message.key !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.key);
+        /* string value = 3; */
+        if (message.value !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.value);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.PropertyUpdate
+ */
+export const PropertyUpdate = new PropertyUpdate$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SetPropertiesRequest$Type extends MessageType<SetPropertiesRequest> {
+    constructor() {
+        super("elephant.user.SetPropertiesRequest", [
+            { no: 1, name: "properties", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => PropertyUpdate }
+        ]);
+    }
+    create(value?: PartialMessage<SetPropertiesRequest>): SetPropertiesRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.properties = [];
+        if (value !== undefined)
+            reflectionMergePartial<SetPropertiesRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetPropertiesRequest): SetPropertiesRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated elephant.user.PropertyUpdate properties */ 1:
+                    message.properties.push(PropertyUpdate.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SetPropertiesRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated elephant.user.PropertyUpdate properties = 1; */
+        for (let i = 0; i < message.properties.length; i++)
+            PropertyUpdate.internalBinaryWrite(message.properties[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.SetPropertiesRequest
+ */
+export const SetPropertiesRequest = new SetPropertiesRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SetPropertiesResponse$Type extends MessageType<SetPropertiesResponse> {
+    constructor() {
+        super("elephant.user.SetPropertiesResponse", []);
+    }
+    create(value?: PartialMessage<SetPropertiesResponse>): SetPropertiesResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<SetPropertiesResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetPropertiesResponse): SetPropertiesResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SetPropertiesResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.SetPropertiesResponse
+ */
+export const SetPropertiesResponse = new SetPropertiesResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class PropertyDelete$Type extends MessageType<PropertyDelete> {
+    constructor() {
+        super("elephant.user.PropertyDelete", [
+            { no: 1, name: "application", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<PropertyDelete>): PropertyDelete {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.application = "";
+        message.key = "";
+        if (value !== undefined)
+            reflectionMergePartial<PropertyDelete>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PropertyDelete): PropertyDelete {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string application */ 1:
+                    message.application = reader.string();
+                    break;
+                case /* string key */ 2:
+                    message.key = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: PropertyDelete, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string application = 1; */
+        if (message.application !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.application);
+        /* string key = 2; */
+        if (message.key !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.key);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.PropertyDelete
+ */
+export const PropertyDelete = new PropertyDelete$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeletePropertiesRequest$Type extends MessageType<DeletePropertiesRequest> {
+    constructor() {
+        super("elephant.user.DeletePropertiesRequest", [
+            { no: 1, name: "properties", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => PropertyDelete }
+        ]);
+    }
+    create(value?: PartialMessage<DeletePropertiesRequest>): DeletePropertiesRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.properties = [];
+        if (value !== undefined)
+            reflectionMergePartial<DeletePropertiesRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeletePropertiesRequest): DeletePropertiesRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated elephant.user.PropertyDelete properties */ 1:
+                    message.properties.push(PropertyDelete.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeletePropertiesRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated elephant.user.PropertyDelete properties = 1; */
+        for (let i = 0; i < message.properties.length; i++)
+            PropertyDelete.internalBinaryWrite(message.properties[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.DeletePropertiesRequest
+ */
+export const DeletePropertiesRequest = new DeletePropertiesRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeletePropertiesResponse$Type extends MessageType<DeletePropertiesResponse> {
+    constructor() {
+        super("elephant.user.DeletePropertiesResponse", []);
+    }
+    create(value?: PartialMessage<DeletePropertiesResponse>): DeletePropertiesResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<DeletePropertiesResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeletePropertiesResponse): DeletePropertiesResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeletePropertiesResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.DeletePropertiesResponse
+ */
+export const DeletePropertiesResponse = new DeletePropertiesResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class PollEventLogRequest$Type extends MessageType<PollEventLogRequest> {
+    constructor() {
+        super("elephant.user.PollEventLogRequest", [
+            { no: 1, name: "after_id", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<PollEventLogRequest>): PollEventLogRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.afterId = 0n;
+        if (value !== undefined)
+            reflectionMergePartial<PollEventLogRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PollEventLogRequest): PollEventLogRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 after_id */ 1:
+                    message.afterId = reader.int64().toBigInt();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: PollEventLogRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 after_id = 1; */
+        if (message.afterId !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.afterId);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.PollEventLogRequest
+ */
+export const PollEventLogRequest = new PollEventLogRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class PollEventLogResponse$Type extends MessageType<PollEventLogResponse> {
+    constructor() {
+        super("elephant.user.PollEventLogResponse", [
+            { no: 1, name: "last_id", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 2, name: "entries", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => EventLogEntry }
+        ]);
+    }
+    create(value?: PartialMessage<PollEventLogResponse>): PollEventLogResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.lastId = 0n;
+        message.entries = [];
+        if (value !== undefined)
+            reflectionMergePartial<PollEventLogResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PollEventLogResponse): PollEventLogResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 last_id */ 1:
+                    message.lastId = reader.int64().toBigInt();
+                    break;
+                case /* repeated elephant.user.EventLogEntry entries */ 2:
+                    message.entries.push(EventLogEntry.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: PollEventLogResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 last_id = 1; */
+        if (message.lastId !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.lastId);
+        /* repeated elephant.user.EventLogEntry entries = 2; */
+        for (let i = 0; i < message.entries.length; i++)
+            EventLogEntry.internalBinaryWrite(message.entries[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.PollEventLogResponse
+ */
+export const PollEventLogResponse = new PollEventLogResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class EventLogEntry$Type extends MessageType<EventLogEntry> {
+    constructor() {
+        super("elephant.user.EventLogEntry", [
+            { no: 1, name: "id", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 2, name: "owner", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "type", kind: "enum", T: () => ["elephant.user.EventLogEntryType", EventLogEntryType] },
+            { no: 4, name: "kind", kind: "enum", T: () => ["elephant.user.ResourceKind", ResourceKind, "RESOURCE_KIND_"] },
+            { no: 5, name: "application", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "document_type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 8, name: "version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 9, name: "updated_by", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 10, name: "created", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<EventLogEntry>): EventLogEntry {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.id = 0n;
+        message.owner = "";
+        message.type = 0;
+        message.kind = 0;
+        message.application = "";
+        message.documentType = "";
+        message.key = "";
+        message.version = 0n;
+        message.updatedBy = "";
+        message.created = "";
+        if (value !== undefined)
+            reflectionMergePartial<EventLogEntry>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: EventLogEntry): EventLogEntry {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 id */ 1:
+                    message.id = reader.int64().toBigInt();
+                    break;
+                case /* string owner */ 2:
+                    message.owner = reader.string();
+                    break;
+                case /* elephant.user.EventLogEntryType type */ 3:
+                    message.type = reader.int32();
+                    break;
+                case /* elephant.user.ResourceKind kind */ 4:
+                    message.kind = reader.int32();
+                    break;
+                case /* string application */ 5:
+                    message.application = reader.string();
+                    break;
+                case /* string document_type */ 6:
+                    message.documentType = reader.string();
+                    break;
+                case /* string key */ 7:
+                    message.key = reader.string();
+                    break;
+                case /* int64 version */ 8:
+                    message.version = reader.int64().toBigInt();
+                    break;
+                case /* string updated_by */ 9:
+                    message.updatedBy = reader.string();
+                    break;
+                case /* string created */ 10:
+                    message.created = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: EventLogEntry, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 id = 1; */
+        if (message.id !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.id);
+        /* string owner = 2; */
+        if (message.owner !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.owner);
+        /* elephant.user.EventLogEntryType type = 3; */
+        if (message.type !== 0)
+            writer.tag(3, WireType.Varint).int32(message.type);
+        /* elephant.user.ResourceKind kind = 4; */
+        if (message.kind !== 0)
+            writer.tag(4, WireType.Varint).int32(message.kind);
+        /* string application = 5; */
+        if (message.application !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.application);
+        /* string document_type = 6; */
+        if (message.documentType !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.documentType);
+        /* string key = 7; */
+        if (message.key !== "")
+            writer.tag(7, WireType.LengthDelimited).string(message.key);
+        /* int64 version = 8; */
+        if (message.version !== 0n)
+            writer.tag(8, WireType.Varint).int64(message.version);
+        /* string updated_by = 9; */
+        if (message.updatedBy !== "")
+            writer.tag(9, WireType.LengthDelimited).string(message.updatedBy);
+        /* string created = 10; */
+        if (message.created !== "")
+            writer.tag(10, WireType.LengthDelimited).string(message.created);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.user.EventLogEntry
+ */
+export const EventLogEntry = new EventLogEntry$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class PushMessageRequest$Type extends MessageType<PushMessageRequest> {
     constructor() {
@@ -459,7 +2273,7 @@ class PushInboxMessageRequest$Type extends MessageType<PushInboxMessageRequest> 
     constructor() {
         super("elephant.user.PushInboxMessageRequest", [
             { no: 1, name: "recipient", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "payload", kind: "message", T: () => Document }
+            { no: 2, name: "payload", kind: "message", T: () => Document$ }
         ]);
     }
     create(value?: PartialMessage<PushInboxMessageRequest>): PushInboxMessageRequest {
@@ -478,7 +2292,7 @@ class PushInboxMessageRequest$Type extends MessageType<PushInboxMessageRequest> 
                     message.recipient = reader.string();
                     break;
                 case /* newsdoc.Document payload */ 2:
-                    message.payload = Document.internalBinaryRead(reader, reader.uint32(), options, message.payload);
+                    message.payload = Document$.internalBinaryRead(reader, reader.uint32(), options, message.payload);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -497,7 +2311,7 @@ class PushInboxMessageRequest$Type extends MessageType<PushInboxMessageRequest> 
             writer.tag(1, WireType.LengthDelimited).string(message.recipient);
         /* newsdoc.Document payload = 2; */
         if (message.payload)
-            Document.internalBinaryWrite(message.payload, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            Document$.internalBinaryWrite(message.payload, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -879,7 +2693,7 @@ class InboxMessage$Type extends MessageType<InboxMessage> {
             { no: 4, name: "created_by", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "updated", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "is_read", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 7, name: "payload", kind: "message", T: () => Document }
+            { no: 7, name: "payload", kind: "message", T: () => Document$ }
         ]);
     }
     create(value?: PartialMessage<InboxMessage>): InboxMessage {
@@ -918,7 +2732,7 @@ class InboxMessage$Type extends MessageType<InboxMessage> {
                     message.isRead = reader.bool();
                     break;
                 case /* newsdoc.Document payload */ 7:
-                    message.payload = Document.internalBinaryRead(reader, reader.uint32(), options, message.payload);
+                    message.payload = Document$.internalBinaryRead(reader, reader.uint32(), options, message.payload);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -952,7 +2766,7 @@ class InboxMessage$Type extends MessageType<InboxMessage> {
             writer.tag(6, WireType.Varint).bool(message.isRead);
         /* newsdoc.Document payload = 7; */
         if (message.payload)
-            Document.internalBinaryWrite(message.payload, writer.tag(7, WireType.LengthDelimited).fork(), options).join();
+            Document$.internalBinaryWrite(message.payload, writer.tag(7, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -1259,6 +3073,19 @@ class DeleteInboxMessageResponse$Type extends MessageType<DeleteInboxMessageResp
  * @generated MessageType for protobuf message elephant.user.DeleteInboxMessageResponse
  */
 export const DeleteInboxMessageResponse = new DeleteInboxMessageResponse$Type();
+/**
+ * @generated ServiceType for protobuf service elephant.user.Settings
+ */
+export const Settings = new ServiceType("elephant.user.Settings", [
+    { name: "GetDocument", options: {}, I: GetDocumentRequest, O: GetDocumentResponse },
+    { name: "ListDocuments", options: {}, I: ListDocumentsRequest, O: ListDocumentsResponse },
+    { name: "UpdateDocument", options: {}, I: UpdateDocumentRequest, O: UpdateDocumentResponse },
+    { name: "DeleteDocument", options: {}, I: DeleteDocumentRequest, O: DeleteDocumentResponse },
+    { name: "GetProperties", options: {}, I: GetPropertiesRequest, O: GetPropertiesResponse },
+    { name: "SetProperties", options: {}, I: SetPropertiesRequest, O: SetPropertiesResponse },
+    { name: "DeleteProperties", options: {}, I: DeletePropertiesRequest, O: DeletePropertiesResponse },
+    { name: "PollEventLog", options: {}, I: PollEventLogRequest, O: PollEventLogResponse }
+]);
 /**
  * @generated ServiceType for protobuf service elephant.user.Messages
  */
