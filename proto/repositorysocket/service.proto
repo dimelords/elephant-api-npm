@@ -14,6 +14,8 @@ message Call {
   Authenticate authenticate           = 2;
   GetDocuments get_documents          = 3;
   CloseDocumentSet close_document_set = 4;
+  GetEventlog get_eventlog            = 5;
+  CloseEventlog close_eventlog        = 6;
 }
 
 message Response {
@@ -25,8 +27,12 @@ message Response {
   DocumentUpdate document_update = 4;
   InclusionBatch inclusion_batch = 5;
   DocumentRemoved removed        = 6;
-  // Handled is true when the call has been completely handled without errors.
+  // Handled is true when the call has been completely handled without
+  // errors. For calls that create subscriptions this means that the
+  // subscription has been created successfully.
   bool handled                   = 7;
+  // Events from the eventlog.
+  EventlogResponse events        = 8;
 }
 
 // Error is used to communicate errors.
@@ -44,6 +50,48 @@ message Error {
 // Responds with RespSuccess if the connection is successfully authenticated.
 message Authenticate {
   string token   = 1;
+}
+
+message GetEventlog {
+  // Name of the eventlog subscription. Opening an eventlog subscription with
+  // the same name as an existing subscription will close the existing
+  // subscription. This can be used together with `from` to update a
+  // subscription without missing events.
+  string name = 1;
+  // After allows the client to subscribe from after a given event ID. The
+  // server only buffers a limited amount of events (defaults to 100) and
+  // requesting events from before the range of that buffer will result in a
+  // resume out of bounds "eventlog_resume_oob" error.
+  optional int64 after = 2;
+  // DocumentTypes for which the client wants events for. If no types are
+  // provided all types will be included.
+  repeated string document_types = 3;
+  // Languages that the client wants events for. If no languages are provided
+  // all languages will be included. If a document switches language the event for
+  // the switch will be included even if the new document version doesn't have a
+  // matching language anymore.
+  repeated string languages = 4;
+  // TypeSubsets are used to apply subset newsdoc value
+  // extractors to documents and include the results with the event data. Keyed
+  // by document type.
+  map<string, string> type_subsets = 5;
+}
+
+message EventlogResponse {
+  repeated EventlogItem items = 1;
+}
+
+message EventlogItem {
+  // Event from the eventlog.
+  repository.EventlogItem event = 1;
+  // Subset is the extracted subset of the document. Only provided if this is a
+  // document event and subset expressions have been defined for the type.
+  repeated repository.ExtractedValues subset = 2;
+}
+
+message CloseEventlog {
+  // Name of the eventlog subscription to close.
+  string name = 1;
 }
 
 // GetDocuments is used to fetch and optionally subscribe to a set of documents.
@@ -70,6 +118,17 @@ message GetDocuments {
   // IncludeACLs should be set to true to include ACL update events in the
   // stream of updates.
   bool include_acls = 7;
+  // Subset returns a subset of the document as specified by a list of newsdoc
+  // value extractors.
+  repeated string subset = 8;
+  // InclusionSubsets are used to apply subset newsdoc value extractors to
+  // included documents. Keyed by document type.
+  map<string, string> inclusion_subsets = 9;
+}
+
+message InclusionSubset {
+  // Expressions to use to extract document contents.
+  repeated string expressions = 1;
 }
 
 // CloseDocumentSet is used to stop recieving updates for a document set.
@@ -97,6 +156,8 @@ message DocumentState {
   repository.DocumentMeta meta = 1;
   // Document is the document itself.
   newsdoc.Document document    = 2;
+  // Subset is the extracted subset of the document.
+  repeated repository.ExtractedValues subset = 3;
 }
 
 // DocumentUpdate is emitted when a write operation has affected a document in a
@@ -115,6 +176,8 @@ message DocumentUpdate {
   // Included is true if the update is for a document that was added through
   // inclusion.
   bool included                 = 5;
+  // Subset is the extracted subset of the document.
+  repeated repository.ExtractedValues subset = 6;
 }
 
 // DocumentRemoved is emitted when a document is removed from the set.

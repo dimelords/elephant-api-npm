@@ -2,7 +2,7 @@
   "name": "@dimelords/elephant-api-npm",
   "private": false,
   "license": "MIT",
-  "version": "0.21.1",
+  "version": "0.21.2",
   "type": "module",
   "exports": {
     "./repository": {

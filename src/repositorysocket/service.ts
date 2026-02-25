@@ -12,11 +12,12 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
-import { EventlogItem } from "../repository/service";
 import { Document } from "../newsdoc/newsdoc";
 import { DocumentMeta } from "../repository/service";
 import { DocumentFilter } from "../repository/service";
 import { Timespan } from "../repository/service";
+import { ExtractedValues } from "../repository/service";
+import { EventlogItem as EventlogItem$ } from "../repository/service";
 /**
  * @generated from protobuf message elephant.repositorysocket.Call
  */
@@ -40,6 +41,14 @@ export interface Call {
      * @generated from protobuf field: elephant.repositorysocket.CloseDocumentSet close_document_set = 4
      */
     closeDocumentSet?: CloseDocumentSet;
+    /**
+     * @generated from protobuf field: elephant.repositorysocket.GetEventlog get_eventlog = 5
+     */
+    getEventlog?: GetEventlog;
+    /**
+     * @generated from protobuf field: elephant.repositorysocket.CloseEventlog close_eventlog = 6
+     */
+    closeEventlog?: CloseEventlog;
 }
 /**
  * @generated from protobuf message elephant.repositorysocket.Response
@@ -74,11 +83,19 @@ export interface Response {
      */
     removed?: DocumentRemoved;
     /**
-     * Handled is true when the call has been completely handled without errors.
+     * Handled is true when the call has been completely handled without
+     * errors. For calls that create subscriptions this means that the
+     * subscription has been created successfully.
      *
      * @generated from protobuf field: bool handled = 7
      */
     handled: boolean;
+    /**
+     * Events from the eventlog.
+     *
+     * @generated from protobuf field: elephant.repositorysocket.EventlogResponse events = 8
+     */
+    events?: EventlogResponse;
 }
 /**
  * Error is used to communicate errors.
@@ -113,6 +130,93 @@ export interface Authenticate {
      * @generated from protobuf field: string token = 1
      */
     token: string;
+}
+/**
+ * @generated from protobuf message elephant.repositorysocket.GetEventlog
+ */
+export interface GetEventlog {
+    /**
+     * Name of the eventlog subscription. Opening an eventlog subscription with
+     * the same name as an existing subscription will close the existing
+     * subscription. This can be used together with `from` to update a
+     * subscription without missing events.
+     *
+     * @generated from protobuf field: string name = 1
+     */
+    name: string;
+    /**
+     * After allows the client to subscribe from after a given event ID. The
+     * server only buffers a limited amount of events (defaults to 100) and
+     * requesting events from before the range of that buffer will result in a
+     * resume out of bounds "eventlog_resume_oob" error.
+     *
+     * @generated from protobuf field: optional int64 after = 2
+     */
+    after?: bigint;
+    /**
+     * DocumentTypes for which the client wants events for. If no types are
+     * provided all types will be included.
+     *
+     * @generated from protobuf field: repeated string document_types = 3
+     */
+    documentTypes: string[];
+    /**
+     * Languages that the client wants events for. If no languages are provided
+     * all languages will be included. If a document switches language the event for
+     * the switch will be included even if the new document version doesn't have a
+     * matching language anymore.
+     *
+     * @generated from protobuf field: repeated string languages = 4
+     */
+    languages: string[];
+    /**
+     * TypeSubsets are used to apply subset newsdoc value
+     * extractors to documents and include the results with the event data. Keyed
+     * by document type.
+     *
+     * @generated from protobuf field: map<string, string> type_subsets = 5
+     */
+    typeSubsets: {
+        [key: string]: string;
+    };
+}
+/**
+ * @generated from protobuf message elephant.repositorysocket.EventlogResponse
+ */
+export interface EventlogResponse {
+    /**
+     * @generated from protobuf field: repeated elephant.repositorysocket.EventlogItem items = 1
+     */
+    items: EventlogItem[];
+}
+/**
+ * @generated from protobuf message elephant.repositorysocket.EventlogItem
+ */
+export interface EventlogItem {
+    /**
+     * Event from the eventlog.
+     *
+     * @generated from protobuf field: elephant.repository.EventlogItem event = 1
+     */
+    event?: EventlogItem$;
+    /**
+     * Subset is the extracted subset of the document. Only provided if this is a
+     * document event and subset expressions have been defined for the type.
+     *
+     * @generated from protobuf field: repeated elephant.repository.ExtractedValues subset = 2
+     */
+    subset: ExtractedValues[];
+}
+/**
+ * @generated from protobuf message elephant.repositorysocket.CloseEventlog
+ */
+export interface CloseEventlog {
+    /**
+     * Name of the eventlog subscription to close.
+     *
+     * @generated from protobuf field: string name = 1
+     */
+    name: string;
 }
 /**
  * GetDocuments is used to fetch and optionally subscribe to a set of documents.
@@ -170,6 +274,33 @@ export interface GetDocuments {
      * @generated from protobuf field: bool include_acls = 7
      */
     includeAcls: boolean;
+    /**
+     * Subset returns a subset of the document as specified by a list of newsdoc
+     * value extractors.
+     *
+     * @generated from protobuf field: repeated string subset = 8
+     */
+    subset: string[];
+    /**
+     * InclusionSubsets are used to apply subset newsdoc value extractors to
+     * included documents. Keyed by document type.
+     *
+     * @generated from protobuf field: map<string, string> inclusion_subsets = 9
+     */
+    inclusionSubsets: {
+        [key: string]: string;
+    };
+}
+/**
+ * @generated from protobuf message elephant.repositorysocket.InclusionSubset
+ */
+export interface InclusionSubset {
+    /**
+     * Expressions to use to extract document contents.
+     *
+     * @generated from protobuf field: repeated string expressions = 1
+     */
+    expressions: string[];
 }
 /**
  * CloseDocumentSet is used to stop recieving updates for a document set.
@@ -229,6 +360,12 @@ export interface DocumentState {
      * @generated from protobuf field: newsdoc.Document document = 2
      */
     document?: Document;
+    /**
+     * Subset is the extracted subset of the document.
+     *
+     * @generated from protobuf field: repeated elephant.repository.ExtractedValues subset = 3
+     */
+    subset: ExtractedValues[];
 }
 /**
  * DocumentUpdate is emitted when a write operation has affected a document in a
@@ -248,7 +385,7 @@ export interface DocumentUpdate {
      *
      * @generated from protobuf field: elephant.repository.EventlogItem event = 2
      */
-    event?: EventlogItem;
+    event?: EventlogItem$;
     /**
      * Meta information about the document, only included if the document is newly
      * added to the document set.
@@ -270,6 +407,12 @@ export interface DocumentUpdate {
      * @generated from protobuf field: bool included = 5
      */
     included: boolean;
+    /**
+     * Subset is the extracted subset of the document.
+     *
+     * @generated from protobuf field: repeated elephant.repository.ExtractedValues subset = 6
+     */
+    subset: ExtractedValues[];
 }
 /**
  * DocumentRemoved is emitted when a document is removed from the set.
@@ -328,7 +471,9 @@ class Call$Type extends MessageType<Call> {
             { no: 1, name: "call_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "authenticate", kind: "message", T: () => Authenticate },
             { no: 3, name: "get_documents", kind: "message", T: () => GetDocuments },
-            { no: 4, name: "close_document_set", kind: "message", T: () => CloseDocumentSet }
+            { no: 4, name: "close_document_set", kind: "message", T: () => CloseDocumentSet },
+            { no: 5, name: "get_eventlog", kind: "message", T: () => GetEventlog },
+            { no: 6, name: "close_eventlog", kind: "message", T: () => CloseEventlog }
         ]);
     }
     create(value?: PartialMessage<Call>): Call {
@@ -355,6 +500,12 @@ class Call$Type extends MessageType<Call> {
                 case /* elephant.repositorysocket.CloseDocumentSet close_document_set */ 4:
                     message.closeDocumentSet = CloseDocumentSet.internalBinaryRead(reader, reader.uint32(), options, message.closeDocumentSet);
                     break;
+                case /* elephant.repositorysocket.GetEventlog get_eventlog */ 5:
+                    message.getEventlog = GetEventlog.internalBinaryRead(reader, reader.uint32(), options, message.getEventlog);
+                    break;
+                case /* elephant.repositorysocket.CloseEventlog close_eventlog */ 6:
+                    message.closeEventlog = CloseEventlog.internalBinaryRead(reader, reader.uint32(), options, message.closeEventlog);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -379,6 +530,12 @@ class Call$Type extends MessageType<Call> {
         /* elephant.repositorysocket.CloseDocumentSet close_document_set = 4; */
         if (message.closeDocumentSet)
             CloseDocumentSet.internalBinaryWrite(message.closeDocumentSet, writer.tag(4, WireType.LengthDelimited).fork(), options).join();
+        /* elephant.repositorysocket.GetEventlog get_eventlog = 5; */
+        if (message.getEventlog)
+            GetEventlog.internalBinaryWrite(message.getEventlog, writer.tag(5, WireType.LengthDelimited).fork(), options).join();
+        /* elephant.repositorysocket.CloseEventlog close_eventlog = 6; */
+        if (message.closeEventlog)
+            CloseEventlog.internalBinaryWrite(message.closeEventlog, writer.tag(6, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -399,7 +556,8 @@ class Response$Type extends MessageType<Response> {
             { no: 4, name: "document_update", kind: "message", T: () => DocumentUpdate },
             { no: 5, name: "inclusion_batch", kind: "message", T: () => InclusionBatch },
             { no: 6, name: "removed", kind: "message", T: () => DocumentRemoved },
-            { no: 7, name: "handled", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+            { no: 7, name: "handled", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 8, name: "events", kind: "message", T: () => EventlogResponse }
         ]);
     }
     create(value?: PartialMessage<Response>): Response {
@@ -436,6 +594,9 @@ class Response$Type extends MessageType<Response> {
                 case /* bool handled */ 7:
                     message.handled = reader.bool();
                     break;
+                case /* elephant.repositorysocket.EventlogResponse events */ 8:
+                    message.events = EventlogResponse.internalBinaryRead(reader, reader.uint32(), options, message.events);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -469,6 +630,9 @@ class Response$Type extends MessageType<Response> {
         /* bool handled = 7; */
         if (message.handled !== false)
             writer.tag(7, WireType.Varint).bool(message.handled);
+        /* elephant.repositorysocket.EventlogResponse events = 8; */
+        if (message.events)
+            EventlogResponse.internalBinaryWrite(message.events, writer.tag(8, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -582,6 +746,248 @@ class Authenticate$Type extends MessageType<Authenticate> {
  */
 export const Authenticate = new Authenticate$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class GetEventlog$Type extends MessageType<GetEventlog> {
+    constructor() {
+        super("elephant.repositorysocket.GetEventlog", [
+            { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "after", kind: "scalar", opt: true, T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 3, name: "document_types", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "languages", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "type_subsets", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } }
+        ]);
+    }
+    create(value?: PartialMessage<GetEventlog>): GetEventlog {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.name = "";
+        message.documentTypes = [];
+        message.languages = [];
+        message.typeSubsets = {};
+        if (value !== undefined)
+            reflectionMergePartial<GetEventlog>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetEventlog): GetEventlog {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string name */ 1:
+                    message.name = reader.string();
+                    break;
+                case /* optional int64 after */ 2:
+                    message.after = reader.int64().toBigInt();
+                    break;
+                case /* repeated string document_types */ 3:
+                    message.documentTypes.push(reader.string());
+                    break;
+                case /* repeated string languages */ 4:
+                    message.languages.push(reader.string());
+                    break;
+                case /* map<string, string> type_subsets */ 5:
+                    this.binaryReadMap5(message.typeSubsets, reader, options);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    private binaryReadMap5(map: GetEventlog["typeSubsets"], reader: IBinaryReader, options: BinaryReadOptions): void {
+        let len = reader.uint32(), end = reader.pos + len, key: keyof GetEventlog["typeSubsets"] | undefined, val: GetEventlog["typeSubsets"][any] | undefined;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case 1:
+                    key = reader.string();
+                    break;
+                case 2:
+                    val = reader.string();
+                    break;
+                default: throw new globalThis.Error("unknown map entry field for elephant.repositorysocket.GetEventlog.type_subsets");
+            }
+        }
+        map[key ?? ""] = val ?? "";
+    }
+    internalBinaryWrite(message: GetEventlog, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string name = 1; */
+        if (message.name !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.name);
+        /* optional int64 after = 2; */
+        if (message.after !== undefined)
+            writer.tag(2, WireType.Varint).int64(message.after);
+        /* repeated string document_types = 3; */
+        for (let i = 0; i < message.documentTypes.length; i++)
+            writer.tag(3, WireType.LengthDelimited).string(message.documentTypes[i]);
+        /* repeated string languages = 4; */
+        for (let i = 0; i < message.languages.length; i++)
+            writer.tag(4, WireType.LengthDelimited).string(message.languages[i]);
+        /* map<string, string> type_subsets = 5; */
+        for (let k of globalThis.Object.keys(message.typeSubsets))
+            writer.tag(5, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.LengthDelimited).string(message.typeSubsets[k]).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repositorysocket.GetEventlog
+ */
+export const GetEventlog = new GetEventlog$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class EventlogResponse$Type extends MessageType<EventlogResponse> {
+    constructor() {
+        super("elephant.repositorysocket.EventlogResponse", [
+            { no: 1, name: "items", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => EventlogItem }
+        ]);
+    }
+    create(value?: PartialMessage<EventlogResponse>): EventlogResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.items = [];
+        if (value !== undefined)
+            reflectionMergePartial<EventlogResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: EventlogResponse): EventlogResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated elephant.repositorysocket.EventlogItem items */ 1:
+                    message.items.push(EventlogItem.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: EventlogResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated elephant.repositorysocket.EventlogItem items = 1; */
+        for (let i = 0; i < message.items.length; i++)
+            EventlogItem.internalBinaryWrite(message.items[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repositorysocket.EventlogResponse
+ */
+export const EventlogResponse = new EventlogResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class EventlogItem$Type extends MessageType<EventlogItem> {
+    constructor() {
+        super("elephant.repositorysocket.EventlogItem", [
+            { no: 1, name: "event", kind: "message", T: () => EventlogItem$ },
+            { no: 2, name: "subset", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => ExtractedValues }
+        ]);
+    }
+    create(value?: PartialMessage<EventlogItem>): EventlogItem {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.subset = [];
+        if (value !== undefined)
+            reflectionMergePartial<EventlogItem>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: EventlogItem): EventlogItem {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* elephant.repository.EventlogItem event */ 1:
+                    message.event = EventlogItem$.internalBinaryRead(reader, reader.uint32(), options, message.event);
+                    break;
+                case /* repeated elephant.repository.ExtractedValues subset */ 2:
+                    message.subset.push(ExtractedValues.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: EventlogItem, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* elephant.repository.EventlogItem event = 1; */
+        if (message.event)
+            EventlogItem$.internalBinaryWrite(message.event, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* repeated elephant.repository.ExtractedValues subset = 2; */
+        for (let i = 0; i < message.subset.length; i++)
+            ExtractedValues.internalBinaryWrite(message.subset[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repositorysocket.EventlogItem
+ */
+export const EventlogItem = new EventlogItem$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class CloseEventlog$Type extends MessageType<CloseEventlog> {
+    constructor() {
+        super("elephant.repositorysocket.CloseEventlog", [
+            { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<CloseEventlog>): CloseEventlog {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.name = "";
+        if (value !== undefined)
+            reflectionMergePartial<CloseEventlog>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: CloseEventlog): CloseEventlog {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string name */ 1:
+                    message.name = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: CloseEventlog, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string name = 1; */
+        if (message.name !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.name);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repositorysocket.CloseEventlog
+ */
+export const CloseEventlog = new CloseEventlog$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class GetDocuments$Type extends MessageType<GetDocuments> {
     constructor() {
         super("elephant.repositorysocket.GetDocuments", [
@@ -591,7 +997,9 @@ class GetDocuments$Type extends MessageType<GetDocuments> {
             { no: 4, name: "labels", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "filter", kind: "message", T: () => DocumentFilter },
             { no: 6, name: "include", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
-            { no: 7, name: "include_acls", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+            { no: 7, name: "include_acls", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 8, name: "subset", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 9, name: "inclusion_subsets", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } }
         ]);
     }
     create(value?: PartialMessage<GetDocuments>): GetDocuments {
@@ -601,6 +1009,8 @@ class GetDocuments$Type extends MessageType<GetDocuments> {
         message.labels = [];
         message.include = [];
         message.includeAcls = false;
+        message.subset = [];
+        message.inclusionSubsets = {};
         if (value !== undefined)
             reflectionMergePartial<GetDocuments>(this, message, value);
         return message;
@@ -631,6 +1041,12 @@ class GetDocuments$Type extends MessageType<GetDocuments> {
                 case /* bool include_acls */ 7:
                     message.includeAcls = reader.bool();
                     break;
+                case /* repeated string subset */ 8:
+                    message.subset.push(reader.string());
+                    break;
+                case /* map<string, string> inclusion_subsets */ 9:
+                    this.binaryReadMap9(message.inclusionSubsets, reader, options);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -641,6 +1057,22 @@ class GetDocuments$Type extends MessageType<GetDocuments> {
             }
         }
         return message;
+    }
+    private binaryReadMap9(map: GetDocuments["inclusionSubsets"], reader: IBinaryReader, options: BinaryReadOptions): void {
+        let len = reader.uint32(), end = reader.pos + len, key: keyof GetDocuments["inclusionSubsets"] | undefined, val: GetDocuments["inclusionSubsets"][any] | undefined;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case 1:
+                    key = reader.string();
+                    break;
+                case 2:
+                    val = reader.string();
+                    break;
+                default: throw new globalThis.Error("unknown map entry field for elephant.repositorysocket.GetDocuments.inclusion_subsets");
+            }
+        }
+        map[key ?? ""] = val ?? "";
     }
     internalBinaryWrite(message: GetDocuments, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string set_name = 1; */
@@ -664,6 +1096,12 @@ class GetDocuments$Type extends MessageType<GetDocuments> {
         /* bool include_acls = 7; */
         if (message.includeAcls !== false)
             writer.tag(7, WireType.Varint).bool(message.includeAcls);
+        /* repeated string subset = 8; */
+        for (let i = 0; i < message.subset.length; i++)
+            writer.tag(8, WireType.LengthDelimited).string(message.subset[i]);
+        /* map<string, string> inclusion_subsets = 9; */
+        for (let k of globalThis.Object.keys(message.inclusionSubsets))
+            writer.tag(9, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.LengthDelimited).string(message.inclusionSubsets[k]).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -674,6 +1112,53 @@ class GetDocuments$Type extends MessageType<GetDocuments> {
  * @generated MessageType for protobuf message elephant.repositorysocket.GetDocuments
  */
 export const GetDocuments = new GetDocuments$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class InclusionSubset$Type extends MessageType<InclusionSubset> {
+    constructor() {
+        super("elephant.repositorysocket.InclusionSubset", [
+            { no: 1, name: "expressions", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<InclusionSubset>): InclusionSubset {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.expressions = [];
+        if (value !== undefined)
+            reflectionMergePartial<InclusionSubset>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: InclusionSubset): InclusionSubset {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated string expressions */ 1:
+                    message.expressions.push(reader.string());
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: InclusionSubset, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated string expressions = 1; */
+        for (let i = 0; i < message.expressions.length; i++)
+            writer.tag(1, WireType.LengthDelimited).string(message.expressions[i]);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repositorysocket.InclusionSubset
+ */
+export const InclusionSubset = new InclusionSubset$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class CloseDocumentSet$Type extends MessageType<CloseDocumentSet> {
     constructor() {
@@ -789,11 +1274,13 @@ class DocumentState$Type extends MessageType<DocumentState> {
     constructor() {
         super("elephant.repositorysocket.DocumentState", [
             { no: 1, name: "meta", kind: "message", T: () => DocumentMeta },
-            { no: 2, name: "document", kind: "message", T: () => Document }
+            { no: 2, name: "document", kind: "message", T: () => Document },
+            { no: 3, name: "subset", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => ExtractedValues }
         ]);
     }
     create(value?: PartialMessage<DocumentState>): DocumentState {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.subset = [];
         if (value !== undefined)
             reflectionMergePartial<DocumentState>(this, message, value);
         return message;
@@ -808,6 +1295,9 @@ class DocumentState$Type extends MessageType<DocumentState> {
                     break;
                 case /* newsdoc.Document document */ 2:
                     message.document = Document.internalBinaryRead(reader, reader.uint32(), options, message.document);
+                    break;
+                case /* repeated elephant.repository.ExtractedValues subset */ 3:
+                    message.subset.push(ExtractedValues.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -827,6 +1317,9 @@ class DocumentState$Type extends MessageType<DocumentState> {
         /* newsdoc.Document document = 2; */
         if (message.document)
             Document.internalBinaryWrite(message.document, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* repeated elephant.repository.ExtractedValues subset = 3; */
+        for (let i = 0; i < message.subset.length; i++)
+            ExtractedValues.internalBinaryWrite(message.subset[i], writer.tag(3, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -842,16 +1335,18 @@ class DocumentUpdate$Type extends MessageType<DocumentUpdate> {
     constructor() {
         super("elephant.repositorysocket.DocumentUpdate", [
             { no: 1, name: "set_name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "event", kind: "message", T: () => EventlogItem },
+            { no: 2, name: "event", kind: "message", T: () => EventlogItem$ },
             { no: 3, name: "meta", kind: "message", T: () => DocumentMeta },
             { no: 4, name: "document", kind: "message", T: () => Document },
-            { no: 5, name: "included", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+            { no: 5, name: "included", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 6, name: "subset", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => ExtractedValues }
         ]);
     }
     create(value?: PartialMessage<DocumentUpdate>): DocumentUpdate {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.setName = "";
         message.included = false;
+        message.subset = [];
         if (value !== undefined)
             reflectionMergePartial<DocumentUpdate>(this, message, value);
         return message;
@@ -865,7 +1360,7 @@ class DocumentUpdate$Type extends MessageType<DocumentUpdate> {
                     message.setName = reader.string();
                     break;
                 case /* elephant.repository.EventlogItem event */ 2:
-                    message.event = EventlogItem.internalBinaryRead(reader, reader.uint32(), options, message.event);
+                    message.event = EventlogItem$.internalBinaryRead(reader, reader.uint32(), options, message.event);
                     break;
                 case /* elephant.repository.DocumentMeta meta */ 3:
                     message.meta = DocumentMeta.internalBinaryRead(reader, reader.uint32(), options, message.meta);
@@ -875,6 +1370,9 @@ class DocumentUpdate$Type extends MessageType<DocumentUpdate> {
                     break;
                 case /* bool included */ 5:
                     message.included = reader.bool();
+                    break;
+                case /* repeated elephant.repository.ExtractedValues subset */ 6:
+                    message.subset.push(ExtractedValues.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -893,7 +1391,7 @@ class DocumentUpdate$Type extends MessageType<DocumentUpdate> {
             writer.tag(1, WireType.LengthDelimited).string(message.setName);
         /* elephant.repository.EventlogItem event = 2; */
         if (message.event)
-            EventlogItem.internalBinaryWrite(message.event, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            EventlogItem$.internalBinaryWrite(message.event, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         /* elephant.repository.DocumentMeta meta = 3; */
         if (message.meta)
             DocumentMeta.internalBinaryWrite(message.meta, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
@@ -903,6 +1401,9 @@ class DocumentUpdate$Type extends MessageType<DocumentUpdate> {
         /* bool included = 5; */
         if (message.included !== false)
             writer.tag(5, WireType.Varint).bool(message.included);
+        /* repeated elephant.repository.ExtractedValues subset = 6; */
+        for (let i = 0; i < message.subset.length; i++)
+            ExtractedValues.internalBinaryWrite(message.subset[i], writer.tag(6, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
