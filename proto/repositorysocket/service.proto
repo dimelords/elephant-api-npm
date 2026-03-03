@@ -71,10 +71,14 @@ message GetEventlog {
   // the switch will be included even if the new document version doesn't have a
   // matching language anymore.
   repeated string languages = 4;
-  // TypeSubsets are used to apply subset newsdoc value
-  // extractors to documents and include the results with the event data. Keyed
-  // by document type.
-  map<string, string> type_subsets = 5;
+  // TypeSubsets are used to apply subset newsdoc value extractors to documents
+  // and include the results with the event data. Keyed by document type.
+  map<string, Subsets> type_subsets = 5;
+}
+
+message Subsets {
+  // Expressions to use to extract document contents.
+  repeated string expressions = 1;
 }
 
 message EventlogResponse {
@@ -123,12 +127,7 @@ message GetDocuments {
   repeated string subset = 8;
   // InclusionSubsets are used to apply subset newsdoc value extractors to
   // included documents. Keyed by document type.
-  map<string, string> inclusion_subsets = 9;
-}
-
-message InclusionSubset {
-  // Expressions to use to extract document contents.
-  repeated string expressions = 1;
+  map<string, Subsets> inclusion_subsets = 9;
 }
 
 // CloseDocumentSet is used to stop recieving updates for a document set.
@@ -158,6 +157,8 @@ message DocumentState {
   newsdoc.Document document    = 2;
   // Subset is the extracted subset of the document.
   repeated repository.ExtractedValues subset = 3;
+  // UUID of the document.
+  string uuid = 4;
 }
 
 // DocumentUpdate is emitted when a write operation has affected a document in a

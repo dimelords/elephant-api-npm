@@ -20,6 +20,10 @@ service Documents {
   // Validate is used to validate a document without writing it to the
   // repository.
   rpc Validate(ValidateRequest) returns (ValidateResponse);
+  // Evict removes stored document versions from the main database. The evicted
+  // data will be restored from the archive if requested again by clients. It's
+  // not allowed to evict the current version of a document.
+  rpc Evict(EvictRequest) returns (EvictResponse);
   // Delete deletes a document and all its associated data.
   rpc Delete(DeleteDocumentRequest) returns (DeleteDocumentResponse);
   // ListDeleted lists deleted document instances for a UUID.
@@ -130,6 +134,23 @@ service Metrics {
   rpc RegisterMetric(RegisterMetricRequest) returns (RegisterMetricResponse);
   // GetMetrics returns metrics related to a document.
   rpc GetMetrics(GetMetricsRequest) returns (GetMetricsResponse);
+}
+
+message EvictRequest {
+  // UUID of the document to evict versions of.
+  string uuid         = 1;
+  // Version can be set to a specific version to evict, optional.
+  int64 version       = 2;
+  // UntilVersion can be set to evict all versions up to (inclusive) the
+  // specified version, optional. A negative value will be interpreted as
+  // relative to the current version, set to -1 to evict all non-current
+  // versions.
+  int64 until_version = 3;
+}
+
+message EvictResponse {
+  // EvictCount is the number of versions that were evicted.
+  int64 evict_count = 1;
 }
 
 message GetStatusRequest {
@@ -1177,6 +1198,10 @@ message TypeConfiguration {
   repeated LabelExpression label_expressions   = 3;
   // Variants are the allowed variants for the document type.
   repeated string variants                     = 4;
+  // EvictNonCurrentAfter can be set to evict non-current versions of a
+  // document from the database after they're older than the given number of
+  // days. Optional.
+  int64 evict_noncurrent_after                 = 5;
 }
 
 message TypeTimeExpression {

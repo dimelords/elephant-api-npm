@@ -16,6 +16,43 @@ import { MessageType } from "@protobuf-ts/runtime";
 import { Block } from "../newsdoc/newsdoc";
 import { Document } from "../newsdoc/newsdoc";
 /**
+ * @generated from protobuf message elephant.repository.EvictRequest
+ */
+export interface EvictRequest {
+    /**
+     * UUID of the document to evict versions of.
+     *
+     * @generated from protobuf field: string uuid = 1
+     */
+    uuid: string;
+    /**
+     * Version can be set to a specific version to evict, optional.
+     *
+     * @generated from protobuf field: int64 version = 2
+     */
+    version: bigint;
+    /**
+     * UntilVersion can be set to evict all versions up to (inclusive) the
+     * specified version, optional. A negative value will be interpreted as
+     * relative to the current version, set to -1 to evict all non-current
+     * versions.
+     *
+     * @generated from protobuf field: int64 until_version = 3
+     */
+    untilVersion: bigint;
+}
+/**
+ * @generated from protobuf message elephant.repository.EvictResponse
+ */
+export interface EvictResponse {
+    /**
+     * EvictCount is the number of versions that were evicted.
+     *
+     * @generated from protobuf field: int64 evict_count = 1
+     */
+    evictCount: bigint;
+}
+/**
  * @generated from protobuf message elephant.repository.GetStatusRequest
  */
 export interface GetStatusRequest {
@@ -2594,6 +2631,14 @@ export interface TypeConfiguration {
      * @generated from protobuf field: repeated string variants = 4
      */
     variants: string[];
+    /**
+     * EvictNonCurrentAfter can be set to evict non-current versions of a
+     * document from the database after they're older than the given number of
+     * days. Optional.
+     *
+     * @generated from protobuf field: int64 evict_noncurrent_after = 5
+     */
+    evictNoncurrentAfter: bigint;
 }
 /**
  * @generated from protobuf message elephant.repository.TypeTimeExpression
@@ -2879,6 +2924,116 @@ export enum FilterOperator {
      */
     FILTER_OP_NONE = 3
 }
+// @generated message type with reflection information, may provide speed optimized methods
+class EvictRequest$Type extends MessageType<EvictRequest> {
+    constructor() {
+        super("elephant.repository.EvictRequest", [
+            { no: 1, name: "uuid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 3, name: "until_version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<EvictRequest>): EvictRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.uuid = "";
+        message.version = 0n;
+        message.untilVersion = 0n;
+        if (value !== undefined)
+            reflectionMergePartial<EvictRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: EvictRequest): EvictRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string uuid */ 1:
+                    message.uuid = reader.string();
+                    break;
+                case /* int64 version */ 2:
+                    message.version = reader.int64().toBigInt();
+                    break;
+                case /* int64 until_version */ 3:
+                    message.untilVersion = reader.int64().toBigInt();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: EvictRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string uuid = 1; */
+        if (message.uuid !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.uuid);
+        /* int64 version = 2; */
+        if (message.version !== 0n)
+            writer.tag(2, WireType.Varint).int64(message.version);
+        /* int64 until_version = 3; */
+        if (message.untilVersion !== 0n)
+            writer.tag(3, WireType.Varint).int64(message.untilVersion);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repository.EvictRequest
+ */
+export const EvictRequest = new EvictRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class EvictResponse$Type extends MessageType<EvictResponse> {
+    constructor() {
+        super("elephant.repository.EvictResponse", [
+            { no: 1, name: "evict_count", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<EvictResponse>): EvictResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.evictCount = 0n;
+        if (value !== undefined)
+            reflectionMergePartial<EvictResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: EvictResponse): EvictResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 evict_count */ 1:
+                    message.evictCount = reader.int64().toBigInt();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: EvictResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 evict_count = 1; */
+        if (message.evictCount !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.evictCount);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repository.EvictResponse
+ */
+export const EvictResponse = new EvictResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class GetStatusRequest$Type extends MessageType<GetStatusRequest> {
     constructor() {
@@ -10776,7 +10931,8 @@ class TypeConfiguration$Type extends MessageType<TypeConfiguration> {
             { no: 1, name: "bounded_collection", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 2, name: "time_expressions", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => TypeTimeExpression },
             { no: 3, name: "label_expressions", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => LabelExpression },
-            { no: 4, name: "variants", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
+            { no: 4, name: "variants", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "evict_noncurrent_after", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
         ]);
     }
     create(value?: PartialMessage<TypeConfiguration>): TypeConfiguration {
@@ -10785,6 +10941,7 @@ class TypeConfiguration$Type extends MessageType<TypeConfiguration> {
         message.timeExpressions = [];
         message.labelExpressions = [];
         message.variants = [];
+        message.evictNoncurrentAfter = 0n;
         if (value !== undefined)
             reflectionMergePartial<TypeConfiguration>(this, message, value);
         return message;
@@ -10805,6 +10962,9 @@ class TypeConfiguration$Type extends MessageType<TypeConfiguration> {
                     break;
                 case /* repeated string variants */ 4:
                     message.variants.push(reader.string());
+                    break;
+                case /* int64 evict_noncurrent_after */ 5:
+                    message.evictNoncurrentAfter = reader.int64().toBigInt();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -10830,6 +10990,9 @@ class TypeConfiguration$Type extends MessageType<TypeConfiguration> {
         /* repeated string variants = 4; */
         for (let i = 0; i < message.variants.length; i++)
             writer.tag(4, WireType.LengthDelimited).string(message.variants[i]);
+        /* int64 evict_noncurrent_after = 5; */
+        if (message.evictNoncurrentAfter !== 0n)
+            writer.tag(5, WireType.Varint).int64(message.evictNoncurrentAfter);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -11543,6 +11706,7 @@ export const Documents = new ServiceType("elephant.repository.Documents", [
     { name: "Update", options: {}, I: UpdateRequest, O: UpdateResponse },
     { name: "BulkUpdate", options: {}, I: BulkUpdateRequest, O: BulkUpdateResponse },
     { name: "Validate", options: {}, I: ValidateRequest, O: ValidateResponse },
+    { name: "Evict", options: {}, I: EvictRequest, O: EvictResponse },
     { name: "Delete", options: {}, I: DeleteDocumentRequest, O: DeleteDocumentResponse },
     { name: "ListDeleted", options: {}, I: ListDeletedRequest, O: ListDeletedResponse },
     { name: "Restore", options: {}, I: RestoreRequest, O: RestoreResponse },

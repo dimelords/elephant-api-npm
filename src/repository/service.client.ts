@@ -102,6 +102,8 @@ import type { ListDeletedResponse } from "./service";
 import type { ListDeletedRequest } from "./service";
 import type { DeleteDocumentResponse } from "./service";
 import type { DeleteDocumentRequest } from "./service";
+import type { EvictResponse } from "./service";
+import type { EvictRequest } from "./service";
 import type { ValidateResponse } from "./service";
 import type { ValidateRequest } from "./service";
 import type { BulkUpdateResponse } from "./service";
@@ -158,6 +160,14 @@ export interface IDocumentsClient {
      * @generated from protobuf rpc: Validate
      */
     validate(input: ValidateRequest, options?: RpcOptions): UnaryCall<ValidateRequest, ValidateResponse>;
+    /**
+     * Evict removes stored document versions from the main database. The evicted
+     * data will be restored from the archive if requested again by clients. It's
+     * not allowed to evict the current version of a document.
+     *
+     * @generated from protobuf rpc: Evict
+     */
+    evict(input: EvictRequest, options?: RpcOptions): UnaryCall<EvictRequest, EvictResponse>;
     /**
      * Delete deletes a document and all its associated data.
      *
@@ -356,12 +366,23 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
         return stackIntercept<ValidateRequest, ValidateResponse>("unary", this._transport, method, opt, input);
     }
     /**
+     * Evict removes stored document versions from the main database. The evicted
+     * data will be restored from the archive if requested again by clients. It's
+     * not allowed to evict the current version of a document.
+     *
+     * @generated from protobuf rpc: Evict
+     */
+    evict(input: EvictRequest, options?: RpcOptions): UnaryCall<EvictRequest, EvictResponse> {
+        const method = this.methods[6], opt = this._transport.mergeOptions(options);
+        return stackIntercept<EvictRequest, EvictResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
      * Delete deletes a document and all its associated data.
      *
      * @generated from protobuf rpc: Delete
      */
     delete(input: DeleteDocumentRequest, options?: RpcOptions): UnaryCall<DeleteDocumentRequest, DeleteDocumentResponse> {
-        const method = this.methods[6], opt = this._transport.mergeOptions(options);
+        const method = this.methods[7], opt = this._transport.mergeOptions(options);
         return stackIntercept<DeleteDocumentRequest, DeleteDocumentResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -370,7 +391,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: ListDeleted
      */
     listDeleted(input: ListDeletedRequest, options?: RpcOptions): UnaryCall<ListDeletedRequest, ListDeletedResponse> {
-        const method = this.methods[7], opt = this._transport.mergeOptions(options);
+        const method = this.methods[8], opt = this._transport.mergeOptions(options);
         return stackIntercept<ListDeletedRequest, ListDeletedResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -379,7 +400,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Restore
      */
     restore(input: RestoreRequest, options?: RpcOptions): UnaryCall<RestoreRequest, RestoreResponse> {
-        const method = this.methods[8], opt = this._transport.mergeOptions(options);
+        const method = this.methods[9], opt = this._transport.mergeOptions(options);
         return stackIntercept<RestoreRequest, RestoreResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -388,7 +409,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Purge
      */
     purge(input: PurgeRequest, options?: RpcOptions): UnaryCall<PurgeRequest, PurgeResponse> {
-        const method = this.methods[9], opt = this._transport.mergeOptions(options);
+        const method = this.methods[10], opt = this._transport.mergeOptions(options);
         return stackIntercept<PurgeRequest, PurgeResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -398,7 +419,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetMeta
      */
     getMeta(input: GetMetaRequest, options?: RpcOptions): UnaryCall<GetMetaRequest, GetMetaResponse> {
-        const method = this.methods[10], opt = this._transport.mergeOptions(options);
+        const method = this.methods[11], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetMetaRequest, GetMetaResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -407,7 +428,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Eventlog
      */
     eventlog(input: GetEventlogRequest, options?: RpcOptions): UnaryCall<GetEventlogRequest, GetEventlogResponse> {
-        const method = this.methods[11], opt = this._transport.mergeOptions(options);
+        const method = this.methods[12], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetEventlogRequest, GetEventlogResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -417,7 +438,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: CompactedEventlog
      */
     compactedEventlog(input: GetCompactedEventlogRequest, options?: RpcOptions): UnaryCall<GetCompactedEventlogRequest, GetCompactedEventlogResponse> {
-        const method = this.methods[12], opt = this._transport.mergeOptions(options);
+        const method = this.methods[13], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetCompactedEventlogRequest, GetCompactedEventlogResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -426,7 +447,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetStatus
      */
     getStatus(input: GetStatusRequest, options?: RpcOptions): UnaryCall<GetStatusRequest, GetStatusResponse> {
-        const method = this.methods[13], opt = this._transport.mergeOptions(options);
+        const method = this.methods[14], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetStatusRequest, GetStatusResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -435,7 +456,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetStatusHistory
      */
     getStatusHistory(input: GetStatusHistoryRequest, options?: RpcOptions): UnaryCall<GetStatusHistoryRequest, GetStatusHistoryReponse> {
-        const method = this.methods[14], opt = this._transport.mergeOptions(options);
+        const method = this.methods[15], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetStatusHistoryRequest, GetStatusHistoryReponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -444,7 +465,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetNilStatuses
      */
     getNilStatuses(input: GetNilStatusesRequest, options?: RpcOptions): UnaryCall<GetNilStatusesRequest, GetNilStatusesResponse> {
-        const method = this.methods[15], opt = this._transport.mergeOptions(options);
+        const method = this.methods[16], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetNilStatusesRequest, GetNilStatusesResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -454,7 +475,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetStatusOverview
      */
     getStatusOverview(input: GetStatusOverviewRequest, options?: RpcOptions): UnaryCall<GetStatusOverviewRequest, GetStatusOverviewResponse> {
-        const method = this.methods[16], opt = this._transport.mergeOptions(options);
+        const method = this.methods[17], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetStatusOverviewRequest, GetStatusOverviewResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -463,7 +484,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetPermissions
      */
     getPermissions(input: GetPermissionsRequest, options?: RpcOptions): UnaryCall<GetPermissionsRequest, GetPermissionsResponse> {
-        const method = this.methods[17], opt = this._transport.mergeOptions(options);
+        const method = this.methods[18], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetPermissionsRequest, GetPermissionsResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -472,7 +493,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Lock
      */
     lock(input: LockRequest, options?: RpcOptions): UnaryCall<LockRequest, LockResponse> {
-        const method = this.methods[18], opt = this._transport.mergeOptions(options);
+        const method = this.methods[19], opt = this._transport.mergeOptions(options);
         return stackIntercept<LockRequest, LockResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -481,7 +502,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: ExtendLock
      */
     extendLock(input: ExtendLockRequest, options?: RpcOptions): UnaryCall<ExtendLockRequest, LockResponse> {
-        const method = this.methods[19], opt = this._transport.mergeOptions(options);
+        const method = this.methods[20], opt = this._transport.mergeOptions(options);
         return stackIntercept<ExtendLockRequest, LockResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -490,7 +511,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Unlock
      */
     unlock(input: UnlockRequest, options?: RpcOptions): UnaryCall<UnlockRequest, UnlockResponse> {
-        const method = this.methods[20], opt = this._transport.mergeOptions(options);
+        const method = this.methods[21], opt = this._transport.mergeOptions(options);
         return stackIntercept<UnlockRequest, UnlockResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -501,7 +522,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetWithheld
      */
     getWithheld(input: GetWithheldRequest, options?: RpcOptions): UnaryCall<GetWithheldRequest, GetWithheldResponse> {
-        const method = this.methods[21], opt = this._transport.mergeOptions(options);
+        const method = this.methods[22], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetWithheldRequest, GetWithheldResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -510,7 +531,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetDeliverableInfo
      */
     getDeliverableInfo(input: GetDeliverableInfoRequest, options?: RpcOptions): UnaryCall<GetDeliverableInfoRequest, GetDeliverableInfoResponse> {
-        const method = this.methods[22], opt = this._transport.mergeOptions(options);
+        const method = this.methods[23], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetDeliverableInfoRequest, GetDeliverableInfoResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -520,7 +541,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: CreateUpload
      */
     createUpload(input: CreateUploadRequest, options?: RpcOptions): UnaryCall<CreateUploadRequest, CreateUploadResponse> {
-        const method = this.methods[23], opt = this._transport.mergeOptions(options);
+        const method = this.methods[24], opt = this._transport.mergeOptions(options);
         return stackIntercept<CreateUploadRequest, CreateUploadResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -529,7 +550,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetAttachments
      */
     getAttachments(input: GetAttachmentsRequest, options?: RpcOptions): UnaryCall<GetAttachmentsRequest, GetAttachmentsResponse> {
-        const method = this.methods[24], opt = this._transport.mergeOptions(options);
+        const method = this.methods[25], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetAttachmentsRequest, GetAttachmentsResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -538,7 +559,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetMatching
      */
     getMatching(input: GetMatchingRequest, options?: RpcOptions): UnaryCall<GetMatchingRequest, GetMatchingResponse> {
-        const method = this.methods[25], opt = this._transport.mergeOptions(options);
+        const method = this.methods[26], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetMatchingRequest, GetMatchingResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -547,7 +568,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetSocketToken
      */
     getSocketToken(input: GetSocketTokenRequest, options?: RpcOptions): UnaryCall<GetSocketTokenRequest, GetSocketTokenResponse> {
-        const method = this.methods[26], opt = this._transport.mergeOptions(options);
+        const method = this.methods[27], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetSocketTokenRequest, GetSocketTokenResponse>("unary", this._transport, method, opt, input);
     }
 }
