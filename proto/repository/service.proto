@@ -20,6 +20,11 @@ service Documents {
   // Validate is used to validate a document without writing it to the
   // repository.
   rpc Validate(ValidateRequest) returns (ValidateResponse);
+  // Prune will attempt to remove invalid parts of a document until what remains
+  // is valid. If that's not possible it will return the same kind of error
+  // information as a Validate call would return, highlighting the remaining
+  // issues.
+  rpc Prune(PruneRequest) returns (PruneResponse);
   // Evict removes stored document versions from the main database. The evicted
   // data will be restored from the archive if requested again by clients. It's
   // not allowed to evict the current version of a document.
@@ -63,6 +68,9 @@ service Documents {
   rpc GetWithheld(GetWithheldRequest) returns (GetWithheldResponse);
   // GetDeliverableInfo returns available information related to the deliverable.
   rpc GetDeliverableInfo(GetDeliverableInfoRequest) returns (GetDeliverableInfoResponse);
+  // BulkGetDeliverableInfo returns deliverable information for multiple
+  // documents in a single request.
+  rpc BulkGetDeliverableInfo(BulkGetDeliverableInfoRequest) returns (BulkGetDeliverableInfoResponse);
   // CreateUpload is used to start the process of uploading objects that then
   // can be attached to a document.
   rpc CreateUpload(CreateUploadRequest) returns (CreateUploadResponse);
@@ -75,26 +83,42 @@ service Documents {
 }
 
 service Schemas {
-  // Register register a new validation schema version.
-  rpc Register(RegisterSchemaRequest) returns (RegisterSchemaResponse);
-  // SetActive activates schema versions.
-  rpc SetActive(SetActiveSchemaRequest) returns (SetActiveSchemaResponse);
+  // RegisterGeneration registers a new schema generation. Registration is
+  // idempotent, so calling RegisterGeneration with the same schema versions
+  // will yield the same generation ID.
+  rpc RegisterGeneration(RegisterGenerationRequest) returns (RegisterGenerationResponse);
+  // SetActive activates or deactivates a schema generation. Activating a
+  // generation always deactivates the currently active schema generation.
+  // Deactivation is only relevant in the context of pending schema
+  // generations, because deactivating an active schema generation isn't
+  // allowed.
+  rpc SetActive(SetActiveSchemasRequest) returns (SetActiveSchemasResponse);
+  // ListGenerations lists the configured schema generations.
+  rpc ListGenerations(ListSchemaGenerationsRequest) returns (ListSchemaGenerationsResponse);
+  // GetExemplars returns the exemplar documents for a schema generation. Known
+  // exemplar version hashes can be provided to avoid re-transferring unchanged
+  // documents.
+  rpc GetExemplars(GetExemplarsRequest) returns (GetExemplarsResponse);
+
   // Get retrieves a schema.
   rpc Get(GetSchemaRequest) returns (GetSchemaResponse);
-  // GetAllActiveSchemas returns the currently active schemas.
+  // GetAllActiveSchemas returns the currently active validation schemas.
   rpc GetAllActive(GetAllActiveSchemasRequest) returns (GetAllActiveSchemasResponse);
   // ListActiveSchemas lists the currently active schemas.
   rpc ListActive(ListActiveSchemasRequest) returns (ListActiveSchemasResponse);
+
   // RegisterMetaType registers a type that can be used for meta documents.
   rpc RegisterMetaType(RegisterMetaTypeRequest) returns (RegisterMetaTypeResponse);
   // RegisterMetaTypeUse registers a meta type for use with a main type.
   rpc RegisterMetaTypeUse(RegisterMetaTypeUseRequest) returns (RegisterMetaTypeUseResponse);
+  // GetMetaTypes lists the registered meta types.
+  rpc GetMetaTypes(GetMetaTypesRequest) returns (GetMetaTypesResponse);
+
   // GetDeprecations lists all deprecations.
   rpc GetDeprecations(GetDeprecationsRequest) returns (GetDeprecationsResponse);
   // UpdateDeprecation creates or updates a deprecation.
   rpc UpdateDeprecation(UpdateDeprecationRequest) returns (UpdateDeprecationResponse);
-  // GetMetaTypes lists the registered meta types.
-  rpc GetMetaTypes(GetMetaTypesRequest) returns (GetMetaTypesResponse);
+
   // GetDocumentTypes lists the defined document types.
   rpc GetDocumentTypes(GetDocumentTypesRequest) returns (GetDocumentTypesResponse);
   // ConfigureType configures a document type.
@@ -335,6 +359,9 @@ message EventlogItem {
   repeated Timespan timespans      = 22;
   // Labels are the labels that were extracted from the last document update.
   repeated string labels           = 23;
+  // SchemaGeneration is the ID of the schema generation that was used to
+  // validate the document.
+  int64 schema_generation          = 24;
 }
 
 message Timespan {
@@ -658,6 +685,17 @@ message ValidateResponse {
   repeated ValidationResult errors = 1;
 }
 
+message PruneRequest {
+  newsdoc.Document document = 1;
+}
+
+message PruneResponse {
+  // Document is the pruned document.
+  newsdoc.Document document = 1;
+  // Errors are validation issues that could not be resolved by pruning.
+  repeated ValidationResult errors = 2;
+}
+
 message ValidationResult {
   repeated EntityRef entity = 1;
   string error = 2;
@@ -908,32 +946,90 @@ message MetaTypeInfo {
   repeated string used_by = 2;
 }
 
-message RegisterSchemaRequest {
-  // Schema to register. The spec can be omitted if a schema URL is passed.
-  Schema schema = 1;
-  // Activate the registered schema immediately.
-  bool activate = 2;
-  // SchemaURL is an HTTP(S) url to the schema to load, can be passed instead of
-  // an inline schema spec.
-  string schema_url = 3;
-  // SchemaSHA256 is a SHA256 checksum to validate the response body from the
-  // schema URL against.
-  string schema_sha256 = 4;
+message RegisterGenerationRequest {
+  // Schemas to register.
+  repeated Schema schemas = 1;
+  // Activation rule for the registered schema generation.
+  SchemaActivation activation = 2;
+  // Examplars are documents that serve as examples of what can be expressed
+  // with the schemas. If any of the exemplars are invalid the registration
+  // request will be rejected.
+  repeated newsdoc.Document exemplars = 3;
 }
 
-message RegisterSchemaResponse {}
+enum SchemaActivation {
+  // No activation status.
+  ACTIVATION_UNKNOWN = 0;
+  // Active schema generations are used to determine whether documents are valid.
+  ACTIVATION_ACTIVE = 1;
+  // Pending schema generations are used for soft validation and we log
+  // validation errors for it. The currently active schema generation still has
+  // the last say in whether a document is valid or not.
+  ACTIVATION_PENDING = 2;
+  // Deactivated schema generation.
+  ACTIVATION_DEACTIVATED = 3;
+}
 
-message SetActiveSchemaRequest {
-  // Name is the name of the schema to activate or deactivate, required.
+message RegisterGenerationResponse {
+  // GenerationID is the ID of the created schema generation.
+  int64 generation_id = 1;
+}
+
+message SetActiveSchemasRequest {
+  // GenerationID is the ID of the generation to activate.
+  int64 generation_id = 1;
+  // Activation setting.
+  SchemaActivation activation = 2;
+}
+
+message SetActiveSchemasResponse {}
+
+message ListSchemaGenerationsRequest {
+  // Before is used to paginate backwards based on the generation ID.
+  int64 before = 1;
+}
+
+message ListSchemaGenerationsResponse {
+  repeated SchemaGeneration items = 1;
+}
+
+message SchemaGeneration {
+  // ID of the schema generation.
+  int64 id = 1;
+  // Status of the generation.
+  SchemaActivation status = 2;
+  // Created is the time (RFC3339) the schema generation was first registered.
+  string created = 3;
+  // Activated is the time (RFC3339) the schema generation was last activated (if it has been activated).
+  string activated = 4;
+  // Deactivated is the time (RFC3339) the schema generation was last deactivated (if it has been deactivated).
+  string deactivated = 5;
+  // Schemas are the schemas that are included in the generation.
+  repeated SchemaReference schemas = 6;
+}
+
+message GetExemplarsRequest {
+  // GenerationID is the ID of the schema generation to get exemplars for.
+  int64 generation_id = 1;
+  // Known exemplar version hashes that the client already has, keyed by
+  // exemplar name. Exemplars with matching version hashes will not be included
+  // in the response.
+  map<string, string> known = 2;
+}
+
+message GetExemplarsResponse {
+  // Exemplars are the exemplar documents for the schema generation.
+  repeated Exemplar exemplars = 1;
+}
+
+message Exemplar {
+  // Name of the exemplar.
   string name = 1;
-  // Version of the schema to activate, required when activating a new version.
-  string version = 2;
-  // Deactivate is used to disable a schema, activate new schema versions
-  // instead if you want to start using a new version.
-  bool deactivate = 3;
+  // Document is the exemplar newsdoc document.
+  newsdoc.Document document = 2;
+  // VersionHash is the version hash of the exemplar document.
+  string version_hash = 3;
 }
-
-message SetActiveSchemaResponse {}
 
 message GetSchemaRequest {
   // Name of the schema to get.
@@ -966,6 +1062,8 @@ message GetAllActiveSchemasResponse {
   bool unchanged          = 2;
   // Removed schemas.
   repeated string removed = 3;
+  // GenerationID is the ID of the currently active schema generation.
+  int64 generation_id     = 4;
 }
 
 message ListActiveSchemasRequest {}
@@ -973,6 +1071,13 @@ message ListActiveSchemasRequest {}
 message ListActiveSchemasResponse {
   // Schemas without the spec populated
   repeated Schema schemas = 1;
+  // GenerationID is the ID of the currently active schema generation.
+  int64 generation_id     = 2;
+}
+
+message SchemaReference {
+  string name    = 1;
+  string version = 2;
 }
 
 message Schema {
@@ -1128,6 +1233,28 @@ message GetDeliverableInfoRequest {
 message GetDeliverableInfoResponse {
   // Indicates whether the deliverable has planning information.
   bool has_planning_info = 1;
+  // UUID of the related planning item.
+  string planning_uuid   = 2;
+  // UUID of the related assignment.
+  string assignment_uuid = 3;
+  // UUID of the related event.
+  string event_uuid      = 4;
+}
+
+message BulkGetDeliverableInfoRequest {
+  // UUIDs of the deliverables to look up.
+  repeated string uuids = 1;
+}
+
+message BulkGetDeliverableInfoResponse {
+  // Items contains one entry per deliverable that has planning information.
+  // Deliverables without planning information are omitted.
+  repeated DeliverableInfo items = 1;
+}
+
+message DeliverableInfo {
+  // UUID of the deliverable document.
+  string uuid           = 1;
   // UUID of the related planning item.
   string planning_uuid   = 2;
   // UUID of the related assignment.

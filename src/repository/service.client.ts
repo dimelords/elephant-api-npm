@@ -38,12 +38,12 @@ import type { ConfigureTypeResponse } from "./service";
 import type { ConfigureTypeRequest } from "./service";
 import type { GetDocumentTypesResponse } from "./service";
 import type { GetDocumentTypesRequest } from "./service";
-import type { GetMetaTypesResponse } from "./service";
-import type { GetMetaTypesRequest } from "./service";
 import type { UpdateDeprecationResponse } from "./service";
 import type { UpdateDeprecationRequest } from "./service";
 import type { GetDeprecationsResponse } from "./service";
 import type { GetDeprecationsRequest } from "./service";
+import type { GetMetaTypesResponse } from "./service";
+import type { GetMetaTypesRequest } from "./service";
 import type { RegisterMetaTypeUseResponse } from "./service";
 import type { RegisterMetaTypeUseRequest } from "./service";
 import type { RegisterMetaTypeResponse } from "./service";
@@ -54,10 +54,14 @@ import type { GetAllActiveSchemasResponse } from "./service";
 import type { GetAllActiveSchemasRequest } from "./service";
 import type { GetSchemaResponse } from "./service";
 import type { GetSchemaRequest } from "./service";
-import type { SetActiveSchemaResponse } from "./service";
-import type { SetActiveSchemaRequest } from "./service";
-import type { RegisterSchemaResponse } from "./service";
-import type { RegisterSchemaRequest } from "./service";
+import type { GetExemplarsResponse } from "./service";
+import type { GetExemplarsRequest } from "./service";
+import type { ListSchemaGenerationsResponse } from "./service";
+import type { ListSchemaGenerationsRequest } from "./service";
+import type { SetActiveSchemasResponse } from "./service";
+import type { SetActiveSchemasRequest } from "./service";
+import type { RegisterGenerationResponse } from "./service";
+import type { RegisterGenerationRequest } from "./service";
 import type { RpcTransport } from "@protobuf-ts/runtime-rpc";
 import type { ServiceInfo } from "@protobuf-ts/runtime-rpc";
 import { Documents } from "./service";
@@ -69,6 +73,8 @@ import type { GetAttachmentsResponse } from "./service";
 import type { GetAttachmentsRequest } from "./service";
 import type { CreateUploadResponse } from "./service";
 import type { CreateUploadRequest } from "./service";
+import type { BulkGetDeliverableInfoResponse } from "./service";
+import type { BulkGetDeliverableInfoRequest } from "./service";
 import type { GetDeliverableInfoResponse } from "./service";
 import type { GetDeliverableInfoRequest } from "./service";
 import type { GetWithheldResponse } from "./service";
@@ -104,6 +110,8 @@ import type { DeleteDocumentResponse } from "./service";
 import type { DeleteDocumentRequest } from "./service";
 import type { EvictResponse } from "./service";
 import type { EvictRequest } from "./service";
+import type { PruneResponse } from "./service";
+import type { PruneRequest } from "./service";
 import type { ValidateResponse } from "./service";
 import type { ValidateRequest } from "./service";
 import type { BulkUpdateResponse } from "./service";
@@ -160,6 +168,15 @@ export interface IDocumentsClient {
      * @generated from protobuf rpc: Validate
      */
     validate(input: ValidateRequest, options?: RpcOptions): UnaryCall<ValidateRequest, ValidateResponse>;
+    /**
+     * Prune will attempt to remove invalid parts of a document until what remains
+     * is valid. If that's not possible it will return the same kind of error
+     * information as a Validate call would return, highlighting the remaining
+     * issues.
+     *
+     * @generated from protobuf rpc: Prune
+     */
+    prune(input: PruneRequest, options?: RpcOptions): UnaryCall<PruneRequest, PruneResponse>;
     /**
      * Evict removes stored document versions from the main database. The evicted
      * data will be restored from the archive if requested again by clients. It's
@@ -276,6 +293,13 @@ export interface IDocumentsClient {
      */
     getDeliverableInfo(input: GetDeliverableInfoRequest, options?: RpcOptions): UnaryCall<GetDeliverableInfoRequest, GetDeliverableInfoResponse>;
     /**
+     * BulkGetDeliverableInfo returns deliverable information for multiple
+     * documents in a single request.
+     *
+     * @generated from protobuf rpc: BulkGetDeliverableInfo
+     */
+    bulkGetDeliverableInfo(input: BulkGetDeliverableInfoRequest, options?: RpcOptions): UnaryCall<BulkGetDeliverableInfoRequest, BulkGetDeliverableInfoResponse>;
+    /**
      * CreateUpload is used to start the process of uploading objects that then
      * can be attached to a document.
      *
@@ -366,6 +390,18 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
         return stackIntercept<ValidateRequest, ValidateResponse>("unary", this._transport, method, opt, input);
     }
     /**
+     * Prune will attempt to remove invalid parts of a document until what remains
+     * is valid. If that's not possible it will return the same kind of error
+     * information as a Validate call would return, highlighting the remaining
+     * issues.
+     *
+     * @generated from protobuf rpc: Prune
+     */
+    prune(input: PruneRequest, options?: RpcOptions): UnaryCall<PruneRequest, PruneResponse> {
+        const method = this.methods[6], opt = this._transport.mergeOptions(options);
+        return stackIntercept<PruneRequest, PruneResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
      * Evict removes stored document versions from the main database. The evicted
      * data will be restored from the archive if requested again by clients. It's
      * not allowed to evict the current version of a document.
@@ -373,7 +409,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Evict
      */
     evict(input: EvictRequest, options?: RpcOptions): UnaryCall<EvictRequest, EvictResponse> {
-        const method = this.methods[6], opt = this._transport.mergeOptions(options);
+        const method = this.methods[7], opt = this._transport.mergeOptions(options);
         return stackIntercept<EvictRequest, EvictResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -382,7 +418,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Delete
      */
     delete(input: DeleteDocumentRequest, options?: RpcOptions): UnaryCall<DeleteDocumentRequest, DeleteDocumentResponse> {
-        const method = this.methods[7], opt = this._transport.mergeOptions(options);
+        const method = this.methods[8], opt = this._transport.mergeOptions(options);
         return stackIntercept<DeleteDocumentRequest, DeleteDocumentResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -391,7 +427,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: ListDeleted
      */
     listDeleted(input: ListDeletedRequest, options?: RpcOptions): UnaryCall<ListDeletedRequest, ListDeletedResponse> {
-        const method = this.methods[8], opt = this._transport.mergeOptions(options);
+        const method = this.methods[9], opt = this._transport.mergeOptions(options);
         return stackIntercept<ListDeletedRequest, ListDeletedResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -400,7 +436,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Restore
      */
     restore(input: RestoreRequest, options?: RpcOptions): UnaryCall<RestoreRequest, RestoreResponse> {
-        const method = this.methods[9], opt = this._transport.mergeOptions(options);
+        const method = this.methods[10], opt = this._transport.mergeOptions(options);
         return stackIntercept<RestoreRequest, RestoreResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -409,7 +445,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Purge
      */
     purge(input: PurgeRequest, options?: RpcOptions): UnaryCall<PurgeRequest, PurgeResponse> {
-        const method = this.methods[10], opt = this._transport.mergeOptions(options);
+        const method = this.methods[11], opt = this._transport.mergeOptions(options);
         return stackIntercept<PurgeRequest, PurgeResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -419,7 +455,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetMeta
      */
     getMeta(input: GetMetaRequest, options?: RpcOptions): UnaryCall<GetMetaRequest, GetMetaResponse> {
-        const method = this.methods[11], opt = this._transport.mergeOptions(options);
+        const method = this.methods[12], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetMetaRequest, GetMetaResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -428,7 +464,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Eventlog
      */
     eventlog(input: GetEventlogRequest, options?: RpcOptions): UnaryCall<GetEventlogRequest, GetEventlogResponse> {
-        const method = this.methods[12], opt = this._transport.mergeOptions(options);
+        const method = this.methods[13], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetEventlogRequest, GetEventlogResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -438,7 +474,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: CompactedEventlog
      */
     compactedEventlog(input: GetCompactedEventlogRequest, options?: RpcOptions): UnaryCall<GetCompactedEventlogRequest, GetCompactedEventlogResponse> {
-        const method = this.methods[13], opt = this._transport.mergeOptions(options);
+        const method = this.methods[14], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetCompactedEventlogRequest, GetCompactedEventlogResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -447,7 +483,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetStatus
      */
     getStatus(input: GetStatusRequest, options?: RpcOptions): UnaryCall<GetStatusRequest, GetStatusResponse> {
-        const method = this.methods[14], opt = this._transport.mergeOptions(options);
+        const method = this.methods[15], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetStatusRequest, GetStatusResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -456,7 +492,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetStatusHistory
      */
     getStatusHistory(input: GetStatusHistoryRequest, options?: RpcOptions): UnaryCall<GetStatusHistoryRequest, GetStatusHistoryReponse> {
-        const method = this.methods[15], opt = this._transport.mergeOptions(options);
+        const method = this.methods[16], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetStatusHistoryRequest, GetStatusHistoryReponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -465,7 +501,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetNilStatuses
      */
     getNilStatuses(input: GetNilStatusesRequest, options?: RpcOptions): UnaryCall<GetNilStatusesRequest, GetNilStatusesResponse> {
-        const method = this.methods[16], opt = this._transport.mergeOptions(options);
+        const method = this.methods[17], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetNilStatusesRequest, GetNilStatusesResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -475,7 +511,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetStatusOverview
      */
     getStatusOverview(input: GetStatusOverviewRequest, options?: RpcOptions): UnaryCall<GetStatusOverviewRequest, GetStatusOverviewResponse> {
-        const method = this.methods[17], opt = this._transport.mergeOptions(options);
+        const method = this.methods[18], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetStatusOverviewRequest, GetStatusOverviewResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -484,7 +520,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetPermissions
      */
     getPermissions(input: GetPermissionsRequest, options?: RpcOptions): UnaryCall<GetPermissionsRequest, GetPermissionsResponse> {
-        const method = this.methods[18], opt = this._transport.mergeOptions(options);
+        const method = this.methods[19], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetPermissionsRequest, GetPermissionsResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -493,7 +529,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Lock
      */
     lock(input: LockRequest, options?: RpcOptions): UnaryCall<LockRequest, LockResponse> {
-        const method = this.methods[19], opt = this._transport.mergeOptions(options);
+        const method = this.methods[20], opt = this._transport.mergeOptions(options);
         return stackIntercept<LockRequest, LockResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -502,7 +538,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: ExtendLock
      */
     extendLock(input: ExtendLockRequest, options?: RpcOptions): UnaryCall<ExtendLockRequest, LockResponse> {
-        const method = this.methods[20], opt = this._transport.mergeOptions(options);
+        const method = this.methods[21], opt = this._transport.mergeOptions(options);
         return stackIntercept<ExtendLockRequest, LockResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -511,7 +547,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: Unlock
      */
     unlock(input: UnlockRequest, options?: RpcOptions): UnaryCall<UnlockRequest, UnlockResponse> {
-        const method = this.methods[21], opt = this._transport.mergeOptions(options);
+        const method = this.methods[22], opt = this._transport.mergeOptions(options);
         return stackIntercept<UnlockRequest, UnlockResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -522,7 +558,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetWithheld
      */
     getWithheld(input: GetWithheldRequest, options?: RpcOptions): UnaryCall<GetWithheldRequest, GetWithheldResponse> {
-        const method = this.methods[22], opt = this._transport.mergeOptions(options);
+        const method = this.methods[23], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetWithheldRequest, GetWithheldResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -531,8 +567,18 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetDeliverableInfo
      */
     getDeliverableInfo(input: GetDeliverableInfoRequest, options?: RpcOptions): UnaryCall<GetDeliverableInfoRequest, GetDeliverableInfoResponse> {
-        const method = this.methods[23], opt = this._transport.mergeOptions(options);
+        const method = this.methods[24], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetDeliverableInfoRequest, GetDeliverableInfoResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * BulkGetDeliverableInfo returns deliverable information for multiple
+     * documents in a single request.
+     *
+     * @generated from protobuf rpc: BulkGetDeliverableInfo
+     */
+    bulkGetDeliverableInfo(input: BulkGetDeliverableInfoRequest, options?: RpcOptions): UnaryCall<BulkGetDeliverableInfoRequest, BulkGetDeliverableInfoResponse> {
+        const method = this.methods[25], opt = this._transport.mergeOptions(options);
+        return stackIntercept<BulkGetDeliverableInfoRequest, BulkGetDeliverableInfoResponse>("unary", this._transport, method, opt, input);
     }
     /**
      * CreateUpload is used to start the process of uploading objects that then
@@ -541,7 +587,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: CreateUpload
      */
     createUpload(input: CreateUploadRequest, options?: RpcOptions): UnaryCall<CreateUploadRequest, CreateUploadResponse> {
-        const method = this.methods[24], opt = this._transport.mergeOptions(options);
+        const method = this.methods[26], opt = this._transport.mergeOptions(options);
         return stackIntercept<CreateUploadRequest, CreateUploadResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -550,7 +596,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetAttachments
      */
     getAttachments(input: GetAttachmentsRequest, options?: RpcOptions): UnaryCall<GetAttachmentsRequest, GetAttachmentsResponse> {
-        const method = this.methods[25], opt = this._transport.mergeOptions(options);
+        const method = this.methods[27], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetAttachmentsRequest, GetAttachmentsResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -559,7 +605,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetMatching
      */
     getMatching(input: GetMatchingRequest, options?: RpcOptions): UnaryCall<GetMatchingRequest, GetMatchingResponse> {
-        const method = this.methods[26], opt = this._transport.mergeOptions(options);
+        const method = this.methods[28], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetMatchingRequest, GetMatchingResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -568,7 +614,7 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
      * @generated from protobuf rpc: GetSocketToken
      */
     getSocketToken(input: GetSocketTokenRequest, options?: RpcOptions): UnaryCall<GetSocketTokenRequest, GetSocketTokenResponse> {
-        const method = this.methods[27], opt = this._transport.mergeOptions(options);
+        const method = this.methods[29], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetSocketTokenRequest, GetSocketTokenResponse>("unary", this._transport, method, opt, input);
     }
 }
@@ -577,17 +623,37 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
  */
 export interface ISchemasClient {
     /**
-     * Register register a new validation schema version.
+     * RegisterGeneration registers a new schema generation. Registration is
+     * idempotent, so calling RegisterGeneration with the same schema versions
+     * will yield the same generation ID.
      *
-     * @generated from protobuf rpc: Register
+     * @generated from protobuf rpc: RegisterGeneration
      */
-    register(input: RegisterSchemaRequest, options?: RpcOptions): UnaryCall<RegisterSchemaRequest, RegisterSchemaResponse>;
+    registerGeneration(input: RegisterGenerationRequest, options?: RpcOptions): UnaryCall<RegisterGenerationRequest, RegisterGenerationResponse>;
     /**
-     * SetActive activates schema versions.
+     * SetActive activates or deactivates a schema generation. Activating a
+     * generation always deactivates the currently active schema generation.
+     * Deactivation is only relevant in the context of pending schema
+     * generations, because deactivating an active schema generation isn't
+     * allowed.
      *
      * @generated from protobuf rpc: SetActive
      */
-    setActive(input: SetActiveSchemaRequest, options?: RpcOptions): UnaryCall<SetActiveSchemaRequest, SetActiveSchemaResponse>;
+    setActive(input: SetActiveSchemasRequest, options?: RpcOptions): UnaryCall<SetActiveSchemasRequest, SetActiveSchemasResponse>;
+    /**
+     * ListGenerations lists the configured schema generations.
+     *
+     * @generated from protobuf rpc: ListGenerations
+     */
+    listGenerations(input: ListSchemaGenerationsRequest, options?: RpcOptions): UnaryCall<ListSchemaGenerationsRequest, ListSchemaGenerationsResponse>;
+    /**
+     * GetExemplars returns the exemplar documents for a schema generation. Known
+     * exemplar version hashes can be provided to avoid re-transferring unchanged
+     * documents.
+     *
+     * @generated from protobuf rpc: GetExemplars
+     */
+    getExemplars(input: GetExemplarsRequest, options?: RpcOptions): UnaryCall<GetExemplarsRequest, GetExemplarsResponse>;
     /**
      * Get retrieves a schema.
      *
@@ -595,7 +661,7 @@ export interface ISchemasClient {
      */
     get(input: GetSchemaRequest, options?: RpcOptions): UnaryCall<GetSchemaRequest, GetSchemaResponse>;
     /**
-     * GetAllActiveSchemas returns the currently active schemas.
+     * GetAllActiveSchemas returns the currently active validation schemas.
      *
      * @generated from protobuf rpc: GetAllActive
      */
@@ -619,6 +685,12 @@ export interface ISchemasClient {
      */
     registerMetaTypeUse(input: RegisterMetaTypeUseRequest, options?: RpcOptions): UnaryCall<RegisterMetaTypeUseRequest, RegisterMetaTypeUseResponse>;
     /**
+     * GetMetaTypes lists the registered meta types.
+     *
+     * @generated from protobuf rpc: GetMetaTypes
+     */
+    getMetaTypes(input: GetMetaTypesRequest, options?: RpcOptions): UnaryCall<GetMetaTypesRequest, GetMetaTypesResponse>;
+    /**
      * GetDeprecations lists all deprecations.
      *
      * @generated from protobuf rpc: GetDeprecations
@@ -630,12 +702,6 @@ export interface ISchemasClient {
      * @generated from protobuf rpc: UpdateDeprecation
      */
     updateDeprecation(input: UpdateDeprecationRequest, options?: RpcOptions): UnaryCall<UpdateDeprecationRequest, UpdateDeprecationResponse>;
-    /**
-     * GetMetaTypes lists the registered meta types.
-     *
-     * @generated from protobuf rpc: GetMetaTypes
-     */
-    getMetaTypes(input: GetMetaTypesRequest, options?: RpcOptions): UnaryCall<GetMetaTypesRequest, GetMetaTypesResponse>;
     /**
      * GetDocumentTypes lists the defined document types.
      *
@@ -665,22 +731,48 @@ export class SchemasClient implements ISchemasClient, ServiceInfo {
     constructor(private readonly _transport: RpcTransport) {
     }
     /**
-     * Register register a new validation schema version.
+     * RegisterGeneration registers a new schema generation. Registration is
+     * idempotent, so calling RegisterGeneration with the same schema versions
+     * will yield the same generation ID.
      *
-     * @generated from protobuf rpc: Register
+     * @generated from protobuf rpc: RegisterGeneration
      */
-    register(input: RegisterSchemaRequest, options?: RpcOptions): UnaryCall<RegisterSchemaRequest, RegisterSchemaResponse> {
+    registerGeneration(input: RegisterGenerationRequest, options?: RpcOptions): UnaryCall<RegisterGenerationRequest, RegisterGenerationResponse> {
         const method = this.methods[0], opt = this._transport.mergeOptions(options);
-        return stackIntercept<RegisterSchemaRequest, RegisterSchemaResponse>("unary", this._transport, method, opt, input);
+        return stackIntercept<RegisterGenerationRequest, RegisterGenerationResponse>("unary", this._transport, method, opt, input);
     }
     /**
-     * SetActive activates schema versions.
+     * SetActive activates or deactivates a schema generation. Activating a
+     * generation always deactivates the currently active schema generation.
+     * Deactivation is only relevant in the context of pending schema
+     * generations, because deactivating an active schema generation isn't
+     * allowed.
      *
      * @generated from protobuf rpc: SetActive
      */
-    setActive(input: SetActiveSchemaRequest, options?: RpcOptions): UnaryCall<SetActiveSchemaRequest, SetActiveSchemaResponse> {
+    setActive(input: SetActiveSchemasRequest, options?: RpcOptions): UnaryCall<SetActiveSchemasRequest, SetActiveSchemasResponse> {
         const method = this.methods[1], opt = this._transport.mergeOptions(options);
-        return stackIntercept<SetActiveSchemaRequest, SetActiveSchemaResponse>("unary", this._transport, method, opt, input);
+        return stackIntercept<SetActiveSchemasRequest, SetActiveSchemasResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * ListGenerations lists the configured schema generations.
+     *
+     * @generated from protobuf rpc: ListGenerations
+     */
+    listGenerations(input: ListSchemaGenerationsRequest, options?: RpcOptions): UnaryCall<ListSchemaGenerationsRequest, ListSchemaGenerationsResponse> {
+        const method = this.methods[2], opt = this._transport.mergeOptions(options);
+        return stackIntercept<ListSchemaGenerationsRequest, ListSchemaGenerationsResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * GetExemplars returns the exemplar documents for a schema generation. Known
+     * exemplar version hashes can be provided to avoid re-transferring unchanged
+     * documents.
+     *
+     * @generated from protobuf rpc: GetExemplars
+     */
+    getExemplars(input: GetExemplarsRequest, options?: RpcOptions): UnaryCall<GetExemplarsRequest, GetExemplarsResponse> {
+        const method = this.methods[3], opt = this._transport.mergeOptions(options);
+        return stackIntercept<GetExemplarsRequest, GetExemplarsResponse>("unary", this._transport, method, opt, input);
     }
     /**
      * Get retrieves a schema.
@@ -688,16 +780,16 @@ export class SchemasClient implements ISchemasClient, ServiceInfo {
      * @generated from protobuf rpc: Get
      */
     get(input: GetSchemaRequest, options?: RpcOptions): UnaryCall<GetSchemaRequest, GetSchemaResponse> {
-        const method = this.methods[2], opt = this._transport.mergeOptions(options);
+        const method = this.methods[4], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetSchemaRequest, GetSchemaResponse>("unary", this._transport, method, opt, input);
     }
     /**
-     * GetAllActiveSchemas returns the currently active schemas.
+     * GetAllActiveSchemas returns the currently active validation schemas.
      *
      * @generated from protobuf rpc: GetAllActive
      */
     getAllActive(input: GetAllActiveSchemasRequest, options?: RpcOptions): UnaryCall<GetAllActiveSchemasRequest, GetAllActiveSchemasResponse> {
-        const method = this.methods[3], opt = this._transport.mergeOptions(options);
+        const method = this.methods[5], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetAllActiveSchemasRequest, GetAllActiveSchemasResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -706,7 +798,7 @@ export class SchemasClient implements ISchemasClient, ServiceInfo {
      * @generated from protobuf rpc: ListActive
      */
     listActive(input: ListActiveSchemasRequest, options?: RpcOptions): UnaryCall<ListActiveSchemasRequest, ListActiveSchemasResponse> {
-        const method = this.methods[4], opt = this._transport.mergeOptions(options);
+        const method = this.methods[6], opt = this._transport.mergeOptions(options);
         return stackIntercept<ListActiveSchemasRequest, ListActiveSchemasResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -715,7 +807,7 @@ export class SchemasClient implements ISchemasClient, ServiceInfo {
      * @generated from protobuf rpc: RegisterMetaType
      */
     registerMetaType(input: RegisterMetaTypeRequest, options?: RpcOptions): UnaryCall<RegisterMetaTypeRequest, RegisterMetaTypeResponse> {
-        const method = this.methods[5], opt = this._transport.mergeOptions(options);
+        const method = this.methods[7], opt = this._transport.mergeOptions(options);
         return stackIntercept<RegisterMetaTypeRequest, RegisterMetaTypeResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -724,26 +816,8 @@ export class SchemasClient implements ISchemasClient, ServiceInfo {
      * @generated from protobuf rpc: RegisterMetaTypeUse
      */
     registerMetaTypeUse(input: RegisterMetaTypeUseRequest, options?: RpcOptions): UnaryCall<RegisterMetaTypeUseRequest, RegisterMetaTypeUseResponse> {
-        const method = this.methods[6], opt = this._transport.mergeOptions(options);
-        return stackIntercept<RegisterMetaTypeUseRequest, RegisterMetaTypeUseResponse>("unary", this._transport, method, opt, input);
-    }
-    /**
-     * GetDeprecations lists all deprecations.
-     *
-     * @generated from protobuf rpc: GetDeprecations
-     */
-    getDeprecations(input: GetDeprecationsRequest, options?: RpcOptions): UnaryCall<GetDeprecationsRequest, GetDeprecationsResponse> {
-        const method = this.methods[7], opt = this._transport.mergeOptions(options);
-        return stackIntercept<GetDeprecationsRequest, GetDeprecationsResponse>("unary", this._transport, method, opt, input);
-    }
-    /**
-     * UpdateDeprecation creates or updates a deprecation.
-     *
-     * @generated from protobuf rpc: UpdateDeprecation
-     */
-    updateDeprecation(input: UpdateDeprecationRequest, options?: RpcOptions): UnaryCall<UpdateDeprecationRequest, UpdateDeprecationResponse> {
         const method = this.methods[8], opt = this._transport.mergeOptions(options);
-        return stackIntercept<UpdateDeprecationRequest, UpdateDeprecationResponse>("unary", this._transport, method, opt, input);
+        return stackIntercept<RegisterMetaTypeUseRequest, RegisterMetaTypeUseResponse>("unary", this._transport, method, opt, input);
     }
     /**
      * GetMetaTypes lists the registered meta types.
@@ -755,12 +829,30 @@ export class SchemasClient implements ISchemasClient, ServiceInfo {
         return stackIntercept<GetMetaTypesRequest, GetMetaTypesResponse>("unary", this._transport, method, opt, input);
     }
     /**
+     * GetDeprecations lists all deprecations.
+     *
+     * @generated from protobuf rpc: GetDeprecations
+     */
+    getDeprecations(input: GetDeprecationsRequest, options?: RpcOptions): UnaryCall<GetDeprecationsRequest, GetDeprecationsResponse> {
+        const method = this.methods[10], opt = this._transport.mergeOptions(options);
+        return stackIntercept<GetDeprecationsRequest, GetDeprecationsResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * UpdateDeprecation creates or updates a deprecation.
+     *
+     * @generated from protobuf rpc: UpdateDeprecation
+     */
+    updateDeprecation(input: UpdateDeprecationRequest, options?: RpcOptions): UnaryCall<UpdateDeprecationRequest, UpdateDeprecationResponse> {
+        const method = this.methods[11], opt = this._transport.mergeOptions(options);
+        return stackIntercept<UpdateDeprecationRequest, UpdateDeprecationResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
      * GetDocumentTypes lists the defined document types.
      *
      * @generated from protobuf rpc: GetDocumentTypes
      */
     getDocumentTypes(input: GetDocumentTypesRequest, options?: RpcOptions): UnaryCall<GetDocumentTypesRequest, GetDocumentTypesResponse> {
-        const method = this.methods[10], opt = this._transport.mergeOptions(options);
+        const method = this.methods[12], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetDocumentTypesRequest, GetDocumentTypesResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -769,7 +861,7 @@ export class SchemasClient implements ISchemasClient, ServiceInfo {
      * @generated from protobuf rpc: ConfigureType
      */
     configureType(input: ConfigureTypeRequest, options?: RpcOptions): UnaryCall<ConfigureTypeRequest, ConfigureTypeResponse> {
-        const method = this.methods[11], opt = this._transport.mergeOptions(options);
+        const method = this.methods[13], opt = this._transport.mergeOptions(options);
         return stackIntercept<ConfigureTypeRequest, ConfigureTypeResponse>("unary", this._transport, method, opt, input);
     }
     /**
@@ -778,7 +870,7 @@ export class SchemasClient implements ISchemasClient, ServiceInfo {
      * @generated from protobuf rpc: GetTypeConfiguration
      */
     getTypeConfiguration(input: GetTypeConfigurationRequest, options?: RpcOptions): UnaryCall<GetTypeConfigurationRequest, GetTypeConfigurationResponse> {
-        const method = this.methods[12], opt = this._transport.mergeOptions(options);
+        const method = this.methods[14], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetTypeConfigurationRequest, GetTypeConfigurationResponse>("unary", this._transport, method, opt, input);
     }
 }

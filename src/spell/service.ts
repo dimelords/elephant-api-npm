@@ -237,6 +237,18 @@ export interface CustomEntry {
     forms: {
         [key: string]: string;
     };
+    /**
+     * Updated is the last update time in RFC3339 format.
+     *
+     * @generated from protobuf field: string updated = 8
+     */
+    updated: string;
+    /**
+     * UpdatedBy is the identity of the party that last updated the entry.
+     *
+     * @generated from protobuf field: string updated_by = 9
+     */
+    updatedBy: string;
 }
 /**
  * @generated from protobuf message elephant.spell.ListDictionariesRequest
@@ -989,7 +1001,9 @@ class CustomEntry$Type extends MessageType<CustomEntry> {
             { no: 4, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "common_mistakes", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "level", kind: "enum", T: () => ["elephant.spell.CorrectionLevel", CorrectionLevel] },
-            { no: 7, name: "forms", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } }
+            { no: 7, name: "forms", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } },
+            { no: 8, name: "updated", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 9, name: "updated_by", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<CustomEntry>): CustomEntry {
@@ -1001,6 +1015,8 @@ class CustomEntry$Type extends MessageType<CustomEntry> {
         message.commonMistakes = [];
         message.level = 0;
         message.forms = {};
+        message.updated = "";
+        message.updatedBy = "";
         if (value !== undefined)
             reflectionMergePartial<CustomEntry>(this, message, value);
         return message;
@@ -1030,6 +1046,12 @@ class CustomEntry$Type extends MessageType<CustomEntry> {
                     break;
                 case /* map<string, string> forms */ 7:
                     this.binaryReadMap7(message.forms, reader, options);
+                    break;
+                case /* string updated */ 8:
+                    message.updated = reader.string();
+                    break;
+                case /* string updated_by */ 9:
+                    message.updatedBy = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -1080,6 +1102,12 @@ class CustomEntry$Type extends MessageType<CustomEntry> {
         /* map<string, string> forms = 7; */
         for (let k of globalThis.Object.keys(message.forms))
             writer.tag(7, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.LengthDelimited).string(message.forms[k]).join();
+        /* string updated = 8; */
+        if (message.updated !== "")
+            writer.tag(8, WireType.LengthDelimited).string(message.updated);
+        /* string updated_by = 9; */
+        if (message.updatedBy !== "")
+            writer.tag(9, WireType.LengthDelimited).string(message.updatedBy);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

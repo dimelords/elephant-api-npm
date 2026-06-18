@@ -126,6 +126,10 @@ message CustomEntry {
   // the mapping of different forms of the word or phrase to specific
   // replacements.
   map<string, string> forms       = 7;
+  // Updated is the last update time in RFC3339 format.
+  string updated                  = 8;
+  // UpdatedBy is the identity of the party that last updated the entry.
+  string updated_by               = 9;
 }
 
 message ListDictionariesRequest {}

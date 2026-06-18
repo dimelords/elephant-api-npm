@@ -654,18 +654,46 @@ export interface MultiMatchQueryV1 {
     fuzziness?: Fuzziness;
 }
 /**
- * Fuzziness has more ways to be specified, implementing that when we need it.
- *
  * @generated from protobuf message elephant.index.Fuzziness
  */
 export interface Fuzziness {
     /**
      * Edits is the maximum allowed Levenshtein Edit Distance (or number of
-     * edits).
+     * edits). Valid values are 0, 1, and 2.
      *
      * @generated from protobuf field: int64 edits = 1
      */
     edits: bigint;
+    /**
+     * Auto enables automatic fuzziness based on the length of the search term.
+     * When set, this takes precedence over the edits field. If both low and high
+     * are zero, "AUTO" is used with the default thresholds (AUTO:3,6). Otherwise,
+     * the custom thresholds are used as "AUTO:low,high".
+     *
+     * @generated from protobuf field: elephant.index.FuzzinessAuto auto = 2
+     */
+    auto?: FuzzinessAuto;
+}
+/**
+ * FuzzinessAuto configures automatic fuzziness thresholds. The low and high
+ * values define the term length boundaries for edit distance tiers:
+ *   - Terms shorter than low characters require an exact match (0 edits).
+ *   - Terms with low to high-1 characters allow a maximum of 1 edit.
+ *   - Terms with high or more characters allow a maximum of 2 edits.
+ *
+ * The default thresholds when both are zero are 3 and 6.
+ *
+ * @generated from protobuf message elephant.index.FuzzinessAuto
+ */
+export interface FuzzinessAuto {
+    /**
+     * @generated from protobuf field: int64 low = 1
+     */
+    low: bigint;
+    /**
+     * @generated from protobuf field: int64 high = 2
+     */
+    high: bigint;
 }
 /**
  * @generated from protobuf message elephant.index.MatchPhraseQueryV1
@@ -2983,7 +3011,8 @@ export const MultiMatchQueryV1 = new MultiMatchQueryV1$Type();
 class Fuzziness$Type extends MessageType<Fuzziness> {
     constructor() {
         super("elephant.index.Fuzziness", [
-            { no: 1, name: "edits", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+            { no: 1, name: "edits", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 2, name: "auto", kind: "message", T: () => FuzzinessAuto }
         ]);
     }
     create(value?: PartialMessage<Fuzziness>): Fuzziness {
@@ -3001,6 +3030,9 @@ class Fuzziness$Type extends MessageType<Fuzziness> {
                 case /* int64 edits */ 1:
                     message.edits = reader.int64().toBigInt();
                     break;
+                case /* elephant.index.FuzzinessAuto auto */ 2:
+                    message.auto = FuzzinessAuto.internalBinaryRead(reader, reader.uint32(), options, message.auto);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -3016,6 +3048,9 @@ class Fuzziness$Type extends MessageType<Fuzziness> {
         /* int64 edits = 1; */
         if (message.edits !== 0n)
             writer.tag(1, WireType.Varint).int64(message.edits);
+        /* elephant.index.FuzzinessAuto auto = 2; */
+        if (message.auto)
+            FuzzinessAuto.internalBinaryWrite(message.auto, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -3026,6 +3061,61 @@ class Fuzziness$Type extends MessageType<Fuzziness> {
  * @generated MessageType for protobuf message elephant.index.Fuzziness
  */
 export const Fuzziness = new Fuzziness$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class FuzzinessAuto$Type extends MessageType<FuzzinessAuto> {
+    constructor() {
+        super("elephant.index.FuzzinessAuto", [
+            { no: 1, name: "low", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 2, name: "high", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<FuzzinessAuto>): FuzzinessAuto {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.low = 0n;
+        message.high = 0n;
+        if (value !== undefined)
+            reflectionMergePartial<FuzzinessAuto>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: FuzzinessAuto): FuzzinessAuto {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 low */ 1:
+                    message.low = reader.int64().toBigInt();
+                    break;
+                case /* int64 high */ 2:
+                    message.high = reader.int64().toBigInt();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: FuzzinessAuto, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 low = 1; */
+        if (message.low !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.low);
+        /* int64 high = 2; */
+        if (message.high !== 0n)
+            writer.tag(2, WireType.Varint).int64(message.high);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.index.FuzzinessAuto
+ */
+export const FuzzinessAuto = new FuzzinessAuto$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class MatchPhraseQueryV1$Type extends MessageType<MatchPhraseQueryV1> {
     constructor() {

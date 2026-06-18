@@ -6,21 +6,74 @@
 import type { RpcTransport } from "@protobuf-ts/runtime-rpc";
 import type { ServiceInfo } from "@protobuf-ts/runtime-rpc";
 import { Replication } from "./service";
+import type { ListTargetsResponse } from "./service";
+import type { ListTargetsRequest } from "./service";
+import type { GetTargetStateResponse } from "./service";
+import type { GetTargetStateRequest } from "./service";
+import type { ChangeTargetStateResponse } from "./service";
+import type { ChangeTargetStateRequest } from "./service";
+import type { RemoveTargetResponse } from "./service";
+import type { RemoveTargetRequest } from "./service";
+import type { ConfigureTargetResponse } from "./service";
+import type { ConfigureTargetRequest } from "./service";
 import { stackIntercept } from "@protobuf-ts/runtime-rpc";
 import type { SendDocumentResponse } from "./service";
 import type { SendDocumentRequest } from "./service";
 import type { UnaryCall } from "@protobuf-ts/runtime-rpc";
 import type { RpcOptions } from "@protobuf-ts/runtime-rpc";
 /**
+ * Replication manages document replication between Elephant repository
+ * instances. A replication target follows the source repository event log and
+ * replicates documents to a target repository.
+ *
  * @generated from protobuf service elephant.replicant.Replication
  */
 export interface IReplicationClient {
     /**
+     * SendDocument triggers replication of a single document by UUID.
+     *
      * @generated from protobuf rpc: SendDocument
      */
     sendDocument(input: SendDocumentRequest, options?: RpcOptions): UnaryCall<SendDocumentRequest, SendDocumentResponse>;
+    /**
+     * ConfigureTarget creates or updates a replication target. The configuration
+     * maps to the environment variables used for static configuration in
+     * elephant-replicant.
+     *
+     * @generated from protobuf rpc: ConfigureTarget
+     */
+    configureTarget(input: ConfigureTargetRequest, options?: RpcOptions): UnaryCall<ConfigureTargetRequest, ConfigureTargetResponse>;
+    /**
+     * RemoveTarget deletes a replication target and stops its replication.
+     *
+     * @generated from protobuf rpc: RemoveTarget
+     */
+    removeTarget(input: RemoveTargetRequest, options?: RpcOptions): UnaryCall<RemoveTargetRequest, RemoveTargetResponse>;
+    /**
+     * ChangeTargetState starts or stops a replication target.
+     *
+     * @generated from protobuf rpc: ChangeTargetState
+     */
+    changeTargetState(input: ChangeTargetStateRequest, options?: RpcOptions): UnaryCall<ChangeTargetStateRequest, ChangeTargetStateResponse>;
+    /**
+     * GetTargetState returns the current state of a replication target.
+     *
+     * @generated from protobuf rpc: GetTargetState
+     */
+    getTargetState(input: GetTargetStateRequest, options?: RpcOptions): UnaryCall<GetTargetStateRequest, GetTargetStateResponse>;
+    /**
+     * ListTargets returns all configured replication targets and their current
+     * state.
+     *
+     * @generated from protobuf rpc: ListTargets
+     */
+    listTargets(input: ListTargetsRequest, options?: RpcOptions): UnaryCall<ListTargetsRequest, ListTargetsResponse>;
 }
 /**
+ * Replication manages document replication between Elephant repository
+ * instances. A replication target follows the source repository event log and
+ * replicates documents to a target repository.
+ *
  * @generated from protobuf service elephant.replicant.Replication
  */
 export class ReplicationClient implements IReplicationClient, ServiceInfo {
@@ -30,10 +83,60 @@ export class ReplicationClient implements IReplicationClient, ServiceInfo {
     constructor(private readonly _transport: RpcTransport) {
     }
     /**
+     * SendDocument triggers replication of a single document by UUID.
+     *
      * @generated from protobuf rpc: SendDocument
      */
     sendDocument(input: SendDocumentRequest, options?: RpcOptions): UnaryCall<SendDocumentRequest, SendDocumentResponse> {
         const method = this.methods[0], opt = this._transport.mergeOptions(options);
         return stackIntercept<SendDocumentRequest, SendDocumentResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * ConfigureTarget creates or updates a replication target. The configuration
+     * maps to the environment variables used for static configuration in
+     * elephant-replicant.
+     *
+     * @generated from protobuf rpc: ConfigureTarget
+     */
+    configureTarget(input: ConfigureTargetRequest, options?: RpcOptions): UnaryCall<ConfigureTargetRequest, ConfigureTargetResponse> {
+        const method = this.methods[1], opt = this._transport.mergeOptions(options);
+        return stackIntercept<ConfigureTargetRequest, ConfigureTargetResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * RemoveTarget deletes a replication target and stops its replication.
+     *
+     * @generated from protobuf rpc: RemoveTarget
+     */
+    removeTarget(input: RemoveTargetRequest, options?: RpcOptions): UnaryCall<RemoveTargetRequest, RemoveTargetResponse> {
+        const method = this.methods[2], opt = this._transport.mergeOptions(options);
+        return stackIntercept<RemoveTargetRequest, RemoveTargetResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * ChangeTargetState starts or stops a replication target.
+     *
+     * @generated from protobuf rpc: ChangeTargetState
+     */
+    changeTargetState(input: ChangeTargetStateRequest, options?: RpcOptions): UnaryCall<ChangeTargetStateRequest, ChangeTargetStateResponse> {
+        const method = this.methods[3], opt = this._transport.mergeOptions(options);
+        return stackIntercept<ChangeTargetStateRequest, ChangeTargetStateResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * GetTargetState returns the current state of a replication target.
+     *
+     * @generated from protobuf rpc: GetTargetState
+     */
+    getTargetState(input: GetTargetStateRequest, options?: RpcOptions): UnaryCall<GetTargetStateRequest, GetTargetStateResponse> {
+        const method = this.methods[4], opt = this._transport.mergeOptions(options);
+        return stackIntercept<GetTargetStateRequest, GetTargetStateResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * ListTargets returns all configured replication targets and their current
+     * state.
+     *
+     * @generated from protobuf rpc: ListTargets
+     */
+    listTargets(input: ListTargetsRequest, options?: RpcOptions): UnaryCall<ListTargetsRequest, ListTargetsResponse> {
+        const method = this.methods[5], opt = this._transport.mergeOptions(options);
+        return stackIntercept<ListTargetsRequest, ListTargetsResponse>("unary", this._transport, method, opt, input);
     }
 }
