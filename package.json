@@ -2,7 +2,7 @@
   "name": "@ttab/elephant-api",
   "private": false,
   "license": "MIT",
-  "version": "0.24.3-beta.2",
+  "version": "0.24.3",
   "type": "module",
   "exports": {
     "./repository": {
@@ -90,7 +90,7 @@
     "lint": "eslint . --cache --report-unused-disable-directives --max-warnings 0",
     "build": "pnpm run typecheck && tsdown",
     "update": "bash scripts/update.sh",
-    "prepublish": "pnpm run build"
+    "prepublishOnly": "pnpm run build"
   },
   "author": "",
   "description": "",
