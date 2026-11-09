@@ -389,3 +389,174 @@ message DeleteInboxMessageRequest {
 }
 
 message DeleteInboxMessageResponse {}
+
+// Configuration manages the revisor schemas that the user service
+// validates settings documents and inbox messages against. Schemas are
+// grouped into config generations that are registered and switched
+// atomically.
+service Configuration {
+  // Registers a new config generation. Registration is idempotent: a
+  // generation containing the same set of schemas returns the already
+  // registered generation (its description is left unchanged). If
+  // activate is set and the matched generation is inactive it will be
+  // activated.
+  rpc RegisterConfigGeneration(RegisterConfigGenerationRequest) returns (RegisterConfigGenerationResponse);
+  // Activates a registered config generation, deactivating the
+  // previously active generation.
+  rpc ActivateConfigGeneration(ActivateConfigGenerationRequest) returns (ActivateConfigGenerationResponse);
+  // Gets the currently active config generation. Supports long-polling
+  // for generation changes.
+  rpc GetActiveConfigGeneration(GetActiveConfigGenerationRequest) returns (GetActiveConfigGenerationResponse);
+  // Lists registered config generations, newest first.
+  rpc ListConfigGenerations(ListConfigGenerationsRequest) returns (ListConfigGenerationsResponse);
+  // Gets a stored schema.
+  rpc GetSchema(GetSchemaRequest) returns (GetSchemaResponse);
+  // Lists the deprecation statuses.
+  rpc GetDeprecations(GetDeprecationsRequest) returns (GetDeprecationsResponse);
+  // Creates or updates a deprecation status.
+  rpc UpdateDeprecation(UpdateDeprecationRequest) returns (UpdateDeprecationResponse);
+}
+
+// SchemaUsage declares what a schema is used for. The values mirror the
+// ecosystem-wide schema usage categorisation; the user service only
+// accepts SCHEMA_USAGE_SETTINGS and SCHEMA_USAGE_MESSAGES.
+enum SchemaUsage {
+  SCHEMA_USAGE_UNSPECIFIED  = 0;
+  SCHEMA_USAGE_EDITORIAL    = 1;
+  SCHEMA_USAGE_DISTRIBUTION = 2;
+  SCHEMA_USAGE_SETTINGS     = 3;
+  SCHEMA_USAGE_MESSAGES     = 4;
+}
+
+// ConfigGenerationSchema references a schema included in a generation.
+message ConfigGenerationSchema {
+  // Name of the schema.
+  string name = 1;
+  // Version of the schema.
+  string version = 2;
+  // Spec is the JSON-encoded revisor constraint set. Optional when the
+  // (name, version) pair is already stored; when supplied for a stored
+  // schema it must match the stored spec.
+  string spec = 3;
+  // Usage the schema is accepted for.
+  SchemaUsage usage = 4;
+}
+
+message ConfigGeneration {
+  // ID is assigned by the server on registration.
+  int64 id = 1;
+  // Description is an optional human-readable tag.
+  string description = 2;
+  // Active is true for the currently active generation.
+  bool active = 3;
+  // Created is the RFC3339 timestamp of registration.
+  string created = 4;
+  // Activated is the RFC3339 timestamp of the last activation, or
+  // empty if the generation never has been activated.
+  string activated = 5;
+  // Schemas in the generation, in registration order. Specs are
+  // omitted in list responses.
+  repeated ConfigGenerationSchema schemas = 6;
+}
+
+message RegisterConfigGenerationRequest {
+  // Description is an optional human-readable tag for the generation.
+  string description = 1;
+  // Schemas the generation should contain. Order is preserved.
+  repeated ConfigGenerationSchema schemas = 2;
+  // Activate the generation immediately.
+  bool activate = 3;
+}
+
+message RegisterConfigGenerationResponse {
+  // Generation is the persisted generation, with its assigned ID.
+  ConfigGeneration generation = 1;
+}
+
+message ActivateConfigGenerationRequest {
+  // ID of the generation to activate.
+  int64 id = 1;
+}
+
+message ActivateConfigGenerationResponse {
+  // Generation is the activated generation.
+  ConfigGeneration generation = 1;
+}
+
+message GetActiveConfigGenerationRequest {
+  // WaitSeconds is the maximum number of seconds to wait for the
+  // active generation to differ from KnownId. Clamped to a maximum of
+  // 10, defaults to 10. Optional.
+  int64 wait_seconds = 1;
+  // KnownId is the generation ID the client already has; the call
+  // returns as soon as the active generation differs. Optional.
+  int64 known_id = 2;
+  // OnlyChanged returns an empty response (with unchanged set to true)
+  // if the active generation still matches KnownId.
+  bool only_changed = 3;
+}
+
+message GetActiveConfigGenerationResponse {
+  // Generation is the active generation, populated with schema specs.
+  // Unset when no generation is active.
+  ConfigGeneration generation = 1;
+  // Unchanged is true if KnownId matched the active generation and
+  // OnlyChanged was set.
+  bool unchanged = 2;
+}
+
+message ListConfigGenerationsRequest {
+  // Before is the highest generation ID to return; defaults to the
+  // latest. Use the smallest returned ID to paginate further into the
+  // past.
+  int64 before = 1;
+  // PageSize defaults to 50, max 200.
+  int64 page_size = 2;
+}
+
+message ListConfigGenerationsResponse {
+  // Generations sorted in descending order by ID (newest first).
+  // Schema specs are not populated.
+  repeated ConfigGeneration generations = 1;
+}
+
+message GetSchemaRequest {
+  // Name of the schema.
+  string name = 1;
+  // Version of the schema. When empty the version from the active
+  // generation is returned.
+  string version = 2;
+}
+
+message GetSchemaResponse {
+  // Version of the returned schema.
+  string version = 1;
+  // Spec is the JSON-encoded revisor constraint set.
+  string spec = 2;
+  // Usage the schema is accepted for.
+  SchemaUsage usage = 3;
+}
+
+// Deprecation is the enforcement status for a deprecation label used
+// in schemas.
+message Deprecation {
+  // Label identifying the deprecation.
+  string label = 1;
+  // Enforced deprecations block writes that use the deprecated
+  // construct; unenforced deprecations are only logged and counted.
+  bool enforced = 2;
+}
+
+message GetDeprecationsRequest {}
+
+message GetDeprecationsResponse {
+  // Deprecations sorted by label.
+  repeated Deprecation deprecations = 1;
+}
+
+message UpdateDeprecationRequest {
+  // Deprecation to create or update.
+  Deprecation deprecation = 1;
+}
+
+message UpdateDeprecationResponse {}

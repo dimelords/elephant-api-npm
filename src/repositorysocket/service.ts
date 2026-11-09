@@ -146,7 +146,7 @@ export interface GetEventlog {
     name: string;
     /**
      * After allows the client to subscribe from after a given event ID. The
-     * server only buffers a limited amount of events (defaults to 100) and
+     * server only buffers a limited amount of events (defaults to 500) and
      * requesting events from before the range of that buffer will result in a
      * resume out of bounds "eventlog_resume_oob" error.
      *
@@ -178,6 +178,14 @@ export interface GetEventlog {
     typeSubsets: {
         [key: string]: Subsets;
     };
+    /**
+     * Events are the event types the client wants events for, one of: "document",
+     * "status", "acl", "delete_document", "restore_finished", "workflow". If no
+     * event types are provided all event types will be included.
+     *
+     * @generated from protobuf field: repeated string events = 6
+     */
+    events: string[];
 }
 /**
  * @generated from protobuf message elephant.repositorysocket.Subsets
@@ -758,7 +766,8 @@ class GetEventlog$Type extends MessageType<GetEventlog> {
             { no: 2, name: "after", kind: "scalar", opt: true, T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
             { no: 3, name: "document_types", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
             { no: 4, name: "languages", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "type_subsets", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "message", T: () => Subsets } }
+            { no: 5, name: "type_subsets", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "message", T: () => Subsets } },
+            { no: 6, name: "events", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<GetEventlog>): GetEventlog {
@@ -767,6 +776,7 @@ class GetEventlog$Type extends MessageType<GetEventlog> {
         message.documentTypes = [];
         message.languages = [];
         message.typeSubsets = {};
+        message.events = [];
         if (value !== undefined)
             reflectionMergePartial<GetEventlog>(this, message, value);
         return message;
@@ -790,6 +800,9 @@ class GetEventlog$Type extends MessageType<GetEventlog> {
                     break;
                 case /* map<string, elephant.repositorysocket.Subsets> type_subsets */ 5:
                     this.binaryReadMap5(message.typeSubsets, reader, options);
+                    break;
+                case /* repeated string events */ 6:
+                    message.events.push(reader.string());
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -838,6 +851,9 @@ class GetEventlog$Type extends MessageType<GetEventlog> {
             Subsets.internalBinaryWrite(message.typeSubsets[k], writer, options);
             writer.join().join();
         }
+        /* repeated string events = 6; */
+        for (let i = 0; i < message.events.length; i++)
+            writer.tag(6, WireType.LengthDelimited).string(message.events[i]);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

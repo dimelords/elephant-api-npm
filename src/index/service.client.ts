@@ -10,6 +10,8 @@ import type { PollSubscriptionResponse } from "./service";
 import type { PollSubscriptionRequest } from "./service";
 import type { GetMappingsResponseV1 } from "./service";
 import type { GetMappingsRequestV1 } from "./service";
+import type { GetFlatDocumentResponse } from "./service";
+import type { GetFlatDocumentRequest } from "./service";
 import type { MultiSearchResponse } from "./service";
 import type { MultiSearchRequest } from "./service";
 import type { QueryResponseV1 } from "./service";
@@ -192,6 +194,15 @@ export interface ISearchV1Client {
      */
     multiSearch(input: MultiSearchRequest, options?: RpcOptions): UnaryCall<MultiSearchRequest, MultiSearchResponse>;
     /**
+     * GetFlatDocument fetches a document directly from the repository and returns
+     * it in the flattened representation used for indexing. This bypasses
+     * OpenSearch, so the result always reflects the current state of the
+     * repository without the eventual consistency of the index.
+     *
+     * @generated from protobuf rpc: GetFlatDocument
+     */
+    getFlatDocument(input: GetFlatDocumentRequest, options?: RpcOptions): UnaryCall<GetFlatDocumentRequest, GetFlatDocumentResponse>;
+    /**
      * @generated from protobuf rpc: GetMappings
      */
     getMappings(input: GetMappingsRequestV1, options?: RpcOptions): UnaryCall<GetMappingsRequestV1, GetMappingsResponseV1>;
@@ -228,24 +239,36 @@ export class SearchV1Client implements ISearchV1Client, ServiceInfo {
         return stackIntercept<MultiSearchRequest, MultiSearchResponse>("unary", this._transport, method, opt, input);
     }
     /**
+     * GetFlatDocument fetches a document directly from the repository and returns
+     * it in the flattened representation used for indexing. This bypasses
+     * OpenSearch, so the result always reflects the current state of the
+     * repository without the eventual consistency of the index.
+     *
+     * @generated from protobuf rpc: GetFlatDocument
+     */
+    getFlatDocument(input: GetFlatDocumentRequest, options?: RpcOptions): UnaryCall<GetFlatDocumentRequest, GetFlatDocumentResponse> {
+        const method = this.methods[2], opt = this._transport.mergeOptions(options);
+        return stackIntercept<GetFlatDocumentRequest, GetFlatDocumentResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
      * @generated from protobuf rpc: GetMappings
      */
     getMappings(input: GetMappingsRequestV1, options?: RpcOptions): UnaryCall<GetMappingsRequestV1, GetMappingsResponseV1> {
-        const method = this.methods[2], opt = this._transport.mergeOptions(options);
+        const method = this.methods[3], opt = this._transport.mergeOptions(options);
         return stackIntercept<GetMappingsRequestV1, GetMappingsResponseV1>("unary", this._transport, method, opt, input);
     }
     /**
      * @generated from protobuf rpc: PollSubscription
      */
     pollSubscription(input: PollSubscriptionRequest, options?: RpcOptions): UnaryCall<PollSubscriptionRequest, PollSubscriptionResponse> {
-        const method = this.methods[3], opt = this._transport.mergeOptions(options);
+        const method = this.methods[4], opt = this._transport.mergeOptions(options);
         return stackIntercept<PollSubscriptionRequest, PollSubscriptionResponse>("unary", this._transport, method, opt, input);
     }
     /**
      * @generated from protobuf rpc: EndSubscription
      */
     endSubscription(input: EndSubscriptionRequest, options?: RpcOptions): UnaryCall<EndSubscriptionRequest, EndSubscriptionResponse> {
-        const method = this.methods[4], opt = this._transport.mergeOptions(options);
+        const method = this.methods[5], opt = this._transport.mergeOptions(options);
         return stackIntercept<EndSubscriptionRequest, EndSubscriptionResponse>("unary", this._transport, method, opt, input);
     }
 }

@@ -32,6 +32,11 @@ service Management {
 service SearchV1 {
   rpc Query(QueryRequestV1) returns (QueryResponseV1);
   rpc MultiSearch(MultiSearchRequest) returns (MultiSearchResponse);
+  // GetFlatDocument fetches a document directly from the repository and returns
+  // it in the flattened representation used for indexing. This bypasses
+  // OpenSearch, so the result always reflects the current state of the
+  // repository without the eventual consistency of the index.
+  rpc GetFlatDocument(GetFlatDocumentRequest) returns (GetFlatDocumentResponse);
   rpc GetMappings(GetMappingsRequestV1) returns (GetMappingsResponseV1);
   rpc PollSubscription(PollSubscriptionRequest) returns (PollSubscriptionResponse);
   rpc EndSubscription(EndSubscriptionRequest) returns (EndSubscriptionResponse);
@@ -359,6 +364,30 @@ message HitV1 {
 
 message FieldValuesV1 {
   repeated string values = 1;
+}
+
+message GetFlatDocumentRequest {
+  // UUID of the document to flatten.
+  string uuid    = 1;
+  // Version of the document to fetch. Optional, defaults to the current
+  // version. Ignored when stored is set.
+  int64 version  = 2;
+  // Status name used to select the document version to fetch, as an alternative
+  // to version. Optional. Ignored when stored is set.
+  string status  = 3;
+  // Stored returns the flattened document as it is currently stored in the
+  // active index instead of converting the current version from the
+  // repository. This reflects the indexed state, and is therefore subject to
+  // the eventual consistency of the index.
+  bool stored    = 4;
+}
+
+message GetFlatDocumentResponse {
+  // Fields is the flattened representation of the document, keyed by field name.
+  map<string, FieldValuesV1> fields = 1;
+  // Document that was flattened. Only populated when converting from the
+  // repository, not when returning the stored document.
+  newsdoc.Document document         = 2;
 }
 
 message GetMappingsRequestV1 {

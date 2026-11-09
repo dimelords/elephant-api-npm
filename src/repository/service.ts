@@ -801,12 +801,15 @@ export interface GetDocumentRequest {
      */
     status: string;
     /**
-     * Lock will lock the document for updates. This only affects the creation of
-     * new versions of the document, statuses can still be updated.
+     * Lock, when set, acquires a write lock on the document as part of the Get
+     * request. By default the lock only affects the creation of new versions;
+     * statuses and ACLs can still be updated. Set the lock exclusivity to also
+     * block status and/or ACL updates. The granted lock is returned in the
+     * response on success.
      *
-     * @generated from protobuf field: bool lock = 4
+     * @generated from protobuf field: elephant.repository.AcquireLock lock = 4
      */
-    lock: boolean;
+    lock?: AcquireLock;
     /**
      * MetaDocument controls the inclusion of associated meta
      * documents. "META_INCLUDE" will include the document if it
@@ -879,6 +882,12 @@ export interface GetDocumentResponse {
      * @generated from protobuf field: repeated elephant.repository.ExtractedValues subset = 7
      */
     subset: ExtractedValues[];
+    /**
+     * Lock is the granted lock when the request set lock.
+     *
+     * @generated from protobuf field: elephant.repository.LockGrant lock = 8
+     */
+    lock?: LockGrant;
 }
 /**
  * @generated from protobuf message elephant.repository.ExtractedValues
@@ -1853,6 +1862,12 @@ export interface Lock {
      * @generated from protobuf field: string comment = 6
      */
     comment: string;
+    /**
+     * Exclusivity level of the lock.
+     *
+     * @generated from protobuf field: elephant.repository.LockExclusivity exclusivity = 7
+     */
+    exclusivity: LockExclusivity;
 }
 /**
  * @generated from protobuf message elephant.repository.RegisterMetaTypeRequest
@@ -2466,11 +2481,71 @@ export interface LockRequest {
      * @generated from protobuf field: string comment = 4
      */
     comment: string;
+    /**
+     * Exclusivity controls which operations the lock blocks. Defaults to
+     * LOCK_DOCUMENT, which only blocks document updates.
+     *
+     * @generated from protobuf field: elephant.repository.LockExclusivity exclusivity = 5
+     */
+    exclusivity: LockExclusivity;
 }
 /**
  * @generated from protobuf message elephant.repository.LockResponse
  */
 export interface LockResponse {
+    /**
+     * Generated lock token in UUID format.
+     *
+     * @generated from protobuf field: string token = 1
+     */
+    token: string;
+    /**
+     * Expires is the RFC3339 timestamp when the lock will expire.
+     *
+     * @generated from protobuf field: string expires = 2
+     */
+    expires: string;
+}
+/**
+ * AcquireLock describes a lock to acquire as part of a GetDocument request.
+ * It mirrors LockRequest, but omits the redundant document UUID.
+ *
+ * @generated from protobuf message elephant.repository.AcquireLock
+ */
+export interface AcquireLock {
+    /**
+     * Lock TTL in milliseconds.
+     *
+     * @generated from protobuf field: int32 ttl = 1
+     */
+    ttl: number;
+    /**
+     * Name of the locking application. Optional.
+     *
+     * @generated from protobuf field: string app = 2
+     */
+    app: string;
+    /**
+     * Free-form comment string. Optional.
+     *
+     * @generated from protobuf field: string comment = 3
+     */
+    comment: string;
+    /**
+     * Exclusivity controls which operations the lock blocks. Defaults to
+     * LOCK_DOCUMENT, which only blocks document updates.
+     *
+     * @generated from protobuf field: elephant.repository.LockExclusivity exclusivity = 4
+     */
+    exclusivity: LockExclusivity;
+}
+/**
+ * LockGrant is the lock returned when a GetDocument request successfully
+ * acquired a lock via its lock field. It mirrors LockResponse.
+ *
+ * @generated from protobuf message elephant.repository.LockGrant
+ */
+export interface LockGrant {
     /**
      * Generated lock token in UUID format.
      *
@@ -3104,6 +3179,41 @@ export enum GetMetaDoc {
      * @generated from protobuf enum value: META_ONLY = 2;
      */
     META_ONLY = 2
+}
+/**
+ * LockExclusivity controls which operations a document lock blocks for
+ * callers that don't hold the lock token. Document updates (new versions,
+ * deletes) are always blocked by a lock; the exclusivity level can extend
+ * the lock to also cover status and ACL updates.
+ *
+ * @generated from protobuf enum elephant.repository.LockExclusivity
+ */
+export enum LockExclusivity {
+    /**
+     * Block document updates only. Statuses and ACLs can still be updated
+     * by others. This is the default.
+     *
+     * @generated from protobuf enum value: LOCK_DOCUMENT = 0;
+     */
+    LOCK_DOCUMENT = 0,
+    /**
+     * Block document and status updates.
+     *
+     * @generated from protobuf enum value: LOCK_STATUS = 1;
+     */
+    LOCK_STATUS = 1,
+    /**
+     * Block document and ACL updates.
+     *
+     * @generated from protobuf enum value: LOCK_ACL = 2;
+     */
+    LOCK_ACL = 2,
+    /**
+     * Block document, status, and ACL updates.
+     *
+     * @generated from protobuf enum value: LOCK_EXCLUSIVE = 3;
+     */
+    LOCK_EXCLUSIVE = 3
 }
 /**
  * @generated from protobuf enum elephant.repository.SchemaActivation
@@ -5461,7 +5571,7 @@ class GetDocumentRequest$Type extends MessageType<GetDocumentRequest> {
             { no: 1, name: "uuid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
             { no: 3, name: "status", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "lock", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 4, name: "lock", kind: "message", T: () => AcquireLock },
             { no: 5, name: "meta_document", kind: "enum", T: () => ["elephant.repository.GetMetaDoc", GetMetaDoc] },
             { no: 6, name: "meta_document_version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
             { no: 7, name: "subset", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
@@ -5472,7 +5582,6 @@ class GetDocumentRequest$Type extends MessageType<GetDocumentRequest> {
         message.uuid = "";
         message.version = 0n;
         message.status = "";
-        message.lock = false;
         message.metaDocument = 0;
         message.metaDocumentVersion = 0n;
         message.subset = [];
@@ -5494,8 +5603,8 @@ class GetDocumentRequest$Type extends MessageType<GetDocumentRequest> {
                 case /* string status */ 3:
                     message.status = reader.string();
                     break;
-                case /* bool lock */ 4:
-                    message.lock = reader.bool();
+                case /* elephant.repository.AcquireLock lock */ 4:
+                    message.lock = AcquireLock.internalBinaryRead(reader, reader.uint32(), options, message.lock);
                     break;
                 case /* elephant.repository.GetMetaDoc meta_document */ 5:
                     message.metaDocument = reader.int32();
@@ -5527,9 +5636,9 @@ class GetDocumentRequest$Type extends MessageType<GetDocumentRequest> {
         /* string status = 3; */
         if (message.status !== "")
             writer.tag(3, WireType.LengthDelimited).string(message.status);
-        /* bool lock = 4; */
-        if (message.lock !== false)
-            writer.tag(4, WireType.Varint).bool(message.lock);
+        /* elephant.repository.AcquireLock lock = 4; */
+        if (message.lock)
+            AcquireLock.internalBinaryWrite(message.lock, writer.tag(4, WireType.LengthDelimited).fork(), options).join();
         /* elephant.repository.GetMetaDoc meta_document = 5; */
         if (message.metaDocument !== 0)
             writer.tag(5, WireType.Varint).int32(message.metaDocument);
@@ -5559,7 +5668,8 @@ class GetDocumentResponse$Type extends MessageType<GetDocumentResponse> {
             { no: 4, name: "meta", kind: "message", T: () => MetaDocument },
             { no: 5, name: "is_meta_document", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 6, name: "main_document", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 7, name: "subset", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => ExtractedValues }
+            { no: 7, name: "subset", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => ExtractedValues },
+            { no: 8, name: "lock", kind: "message", T: () => LockGrant }
         ]);
     }
     create(value?: PartialMessage<GetDocumentResponse>): GetDocumentResponse {
@@ -5598,6 +5708,9 @@ class GetDocumentResponse$Type extends MessageType<GetDocumentResponse> {
                 case /* repeated elephant.repository.ExtractedValues subset */ 7:
                     message.subset.push(ExtractedValues.internalBinaryRead(reader, reader.uint32(), options));
                     break;
+                case /* elephant.repository.LockGrant lock */ 8:
+                    message.lock = LockGrant.internalBinaryRead(reader, reader.uint32(), options, message.lock);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -5631,6 +5744,9 @@ class GetDocumentResponse$Type extends MessageType<GetDocumentResponse> {
         /* repeated elephant.repository.ExtractedValues subset = 7; */
         for (let i = 0; i < message.subset.length; i++)
             ExtractedValues.internalBinaryWrite(message.subset[i], writer.tag(7, WireType.LengthDelimited).fork(), options).join();
+        /* elephant.repository.LockGrant lock = 8; */
+        if (message.lock)
+            LockGrant.internalBinaryWrite(message.lock, writer.tag(8, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -8320,7 +8436,8 @@ class Lock$Type extends MessageType<Lock> {
             { no: 3, name: "created", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 4, name: "expires", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "app", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "comment", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 6, name: "comment", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "exclusivity", kind: "enum", T: () => ["elephant.repository.LockExclusivity", LockExclusivity] }
         ]);
     }
     create(value?: PartialMessage<Lock>): Lock {
@@ -8331,6 +8448,7 @@ class Lock$Type extends MessageType<Lock> {
         message.expires = "";
         message.app = "";
         message.comment = "";
+        message.exclusivity = 0;
         if (value !== undefined)
             reflectionMergePartial<Lock>(this, message, value);
         return message;
@@ -8357,6 +8475,9 @@ class Lock$Type extends MessageType<Lock> {
                     break;
                 case /* string comment */ 6:
                     message.comment = reader.string();
+                    break;
+                case /* elephant.repository.LockExclusivity exclusivity */ 7:
+                    message.exclusivity = reader.int32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -8388,6 +8509,9 @@ class Lock$Type extends MessageType<Lock> {
         /* string comment = 6; */
         if (message.comment !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.comment);
+        /* elephant.repository.LockExclusivity exclusivity = 7; */
+        if (message.exclusivity !== 0)
+            writer.tag(7, WireType.Varint).int32(message.exclusivity);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -10742,7 +10866,8 @@ class LockRequest$Type extends MessageType<LockRequest> {
             { no: 1, name: "uuid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "ttl", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
             { no: 3, name: "app", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "comment", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 4, name: "comment", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "exclusivity", kind: "enum", T: () => ["elephant.repository.LockExclusivity", LockExclusivity] }
         ]);
     }
     create(value?: PartialMessage<LockRequest>): LockRequest {
@@ -10751,6 +10876,7 @@ class LockRequest$Type extends MessageType<LockRequest> {
         message.ttl = 0;
         message.app = "";
         message.comment = "";
+        message.exclusivity = 0;
         if (value !== undefined)
             reflectionMergePartial<LockRequest>(this, message, value);
         return message;
@@ -10771,6 +10897,9 @@ class LockRequest$Type extends MessageType<LockRequest> {
                     break;
                 case /* string comment */ 4:
                     message.comment = reader.string();
+                    break;
+                case /* elephant.repository.LockExclusivity exclusivity */ 5:
+                    message.exclusivity = reader.int32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -10796,6 +10925,9 @@ class LockRequest$Type extends MessageType<LockRequest> {
         /* string comment = 4; */
         if (message.comment !== "")
             writer.tag(4, WireType.LengthDelimited).string(message.comment);
+        /* elephant.repository.LockExclusivity exclusivity = 5; */
+        if (message.exclusivity !== 0)
+            writer.tag(5, WireType.Varint).int32(message.exclusivity);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -10861,6 +10993,132 @@ class LockResponse$Type extends MessageType<LockResponse> {
  * @generated MessageType for protobuf message elephant.repository.LockResponse
  */
 export const LockResponse = new LockResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class AcquireLock$Type extends MessageType<AcquireLock> {
+    constructor() {
+        super("elephant.repository.AcquireLock", [
+            { no: 1, name: "ttl", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 2, name: "app", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "comment", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "exclusivity", kind: "enum", T: () => ["elephant.repository.LockExclusivity", LockExclusivity] }
+        ]);
+    }
+    create(value?: PartialMessage<AcquireLock>): AcquireLock {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.ttl = 0;
+        message.app = "";
+        message.comment = "";
+        message.exclusivity = 0;
+        if (value !== undefined)
+            reflectionMergePartial<AcquireLock>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: AcquireLock): AcquireLock {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int32 ttl */ 1:
+                    message.ttl = reader.int32();
+                    break;
+                case /* string app */ 2:
+                    message.app = reader.string();
+                    break;
+                case /* string comment */ 3:
+                    message.comment = reader.string();
+                    break;
+                case /* elephant.repository.LockExclusivity exclusivity */ 4:
+                    message.exclusivity = reader.int32();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: AcquireLock, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int32 ttl = 1; */
+        if (message.ttl !== 0)
+            writer.tag(1, WireType.Varint).int32(message.ttl);
+        /* string app = 2; */
+        if (message.app !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.app);
+        /* string comment = 3; */
+        if (message.comment !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.comment);
+        /* elephant.repository.LockExclusivity exclusivity = 4; */
+        if (message.exclusivity !== 0)
+            writer.tag(4, WireType.Varint).int32(message.exclusivity);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repository.AcquireLock
+ */
+export const AcquireLock = new AcquireLock$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class LockGrant$Type extends MessageType<LockGrant> {
+    constructor() {
+        super("elephant.repository.LockGrant", [
+            { no: 1, name: "token", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "expires", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<LockGrant>): LockGrant {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.token = "";
+        message.expires = "";
+        if (value !== undefined)
+            reflectionMergePartial<LockGrant>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: LockGrant): LockGrant {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string token */ 1:
+                    message.token = reader.string();
+                    break;
+                case /* string expires */ 2:
+                    message.expires = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: LockGrant, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string token = 1; */
+        if (message.token !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.token);
+        /* string expires = 2; */
+        if (message.expires !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.expires);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.repository.LockGrant
+ */
+export const LockGrant = new LockGrant$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class ExtendLockRequest$Type extends MessageType<ExtendLockRequest> {
     constructor() {

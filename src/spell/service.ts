@@ -64,6 +64,14 @@ export interface TextRequest {
      * @generated from protobuf field: bool suggestions = 3
      */
     suggestions: boolean;
+    /**
+     * CustomOnly limits checks to the custom dictionary and rules, skipping the
+     * hunspell pass. Useful when you only want to surface custom corrections
+     * without the noise of hunspell results.
+     *
+     * @generated from protobuf field: bool custom_only = 4
+     */
+    customOnly: boolean;
 }
 /**
  * @generated from protobuf message elephant.spell.TextResponse
@@ -105,6 +113,46 @@ export interface MisspelledEntry {
      * @generated from protobuf field: elephant.spell.CorrectionLevel level = 3
      */
     level: CorrectionLevel;
+    /**
+     * Status of the custom entry the correction is based on, e.g. "accepted" or
+     * "pending". Empty for corrections that don't originate from a custom entry
+     * (such as plain hunspell results). Clients can use this to indicate that a
+     * correction comes from an unreviewed (pending) entry.
+     *
+     * @generated from protobuf field: string status = 4
+     */
+    status: string;
+    /**
+     * Spans are the character ranges in the source text where this specific
+     * correction applies. The same text can occur several times with different
+     * outcomes (e.g. only one occurrence is corrected), so clients should act on
+     * these ranges rather than searching for the text. Empty for corrections that
+     * apply wherever the text appears, such as plain hunspell results.
+     *
+     * @generated from protobuf field: repeated elephant.spell.TextSpan spans = 5
+     */
+    spans: TextSpan[];
+}
+/**
+ * TextSpan is a half-open range [start, end) into a source text, counted in
+ * Unicode characters (code points / runes), not bytes. For text within the
+ * Basic Multilingual Plane this matches JavaScript/UTF-16 string offsets.
+ *
+ * @generated from protobuf message elephant.spell.TextSpan
+ */
+export interface TextSpan {
+    /**
+     * Start is the character offset of the match in the source text.
+     *
+     * @generated from protobuf field: int64 start = 1
+     */
+    start: bigint;
+    /**
+     * End is the character offset just past the match.
+     *
+     * @generated from protobuf field: int64 end = 2
+     */
+    end: bigint;
 }
 /**
  * @generated from protobuf message elephant.spell.SuggestionsRequest
@@ -122,6 +170,13 @@ export interface SuggestionsRequest {
      * @generated from protobuf field: string language = 2
      */
     language: string;
+    /**
+     * CustomOnly limits suggestions to the custom dictionary and rules, skipping
+     * the hunspell pass.
+     *
+     * @generated from protobuf field: bool custom_only = 3
+     */
+    customOnly: boolean;
 }
 /**
  * @generated from protobuf message elephant.spell.SuggestionsResponse
@@ -164,17 +219,25 @@ export interface ListEntriesRequest {
      */
     page: bigint;
     /**
-     * Prefix to filter entries by.
+     * Query filters entries by a free-text substring, matched against the entry
+     * text, its description, and its common mistakes.
      *
-     * @generated from protobuf field: string prefix = 3
+     * @generated from protobuf field: string query = 3
      */
-    prefix: string;
+    query: string;
     /**
      * Status to filter entries by
      *
      * @generated from protobuf field: string status = 4
      */
     status: string;
+    /**
+     * PageSize is the number of entries to return per page. Optional, defaults to
+     * 100 when zero.
+     *
+     * @generated from protobuf field: int64 page_size = 5
+     */
+    pageSize: bigint;
 }
 /**
  * @generated from protobuf message elephant.spell.ListEntriesResponse
@@ -214,8 +277,8 @@ export interface CustomEntry {
      */
     description: string;
     /**
-     * CommonMistakes when writing the word or phrase. This is used to pre-filter
-     * text that is spell-checked.
+     * CommonMistakes are misspellings or alternative spellings that should be
+     * flagged and corrected to the entry text. Supports {A|B} expansion.
      *
      * @generated from protobuf field: repeated string common_mistakes = 5
      */
@@ -249,6 +312,43 @@ export interface CustomEntry {
      * @generated from protobuf field: string updated_by = 9
      */
     updatedBy: string;
+    /**
+     * CaseSensitive controls whether the entry matches only with the exact casing
+     * of its text and common mistakes. Defaults to false (case-insensitive
+     * matching), which suits ordinary words. Enable it for proper nouns; a
+     * case-sensitive entry additionally flags leading-letter miscasings of its
+     * text and common mistakes (e.g. "mexico city") and suggests the exact
+     * casing.
+     *
+     * @generated from protobuf field: bool case_sensitive = 10
+     */
+    caseSensitive: boolean;
+    /**
+     * Before, when set, only flags a match when immediately preceded by one of
+     * these words.
+     *
+     * @generated from protobuf field: repeated string before = 11
+     */
+    before: string[];
+    /**
+     * After, when set, only flags a match when immediately followed by one of
+     * these words.
+     *
+     * @generated from protobuf field: repeated string after = 12
+     */
+    after: string[];
+    /**
+     * NotBefore suppresses the match when preceded by one of these words.
+     *
+     * @generated from protobuf field: repeated string not_before = 13
+     */
+    notBefore: string[];
+    /**
+     * NotAfter suppresses the match when followed by one of these words.
+     *
+     * @generated from protobuf field: repeated string not_after = 14
+     */
+    notAfter: string[];
 }
 /**
  * @generated from protobuf message elephant.spell.ListDictionariesRequest
@@ -280,6 +380,24 @@ export interface CustomDictionary {
      * @generated from protobuf field: int64 entry_count = 2
      */
     entryCount: bigint;
+    /**
+     * PendingCount is the number of entries awaiting moderation.
+     *
+     * @generated from protobuf field: int64 pending_count = 3
+     */
+    pendingCount: bigint;
+    /**
+     * RuleCount is the number of pattern rules for the language.
+     *
+     * @generated from protobuf field: int64 rule_count = 4
+     */
+    ruleCount: bigint;
+    /**
+     * RulePendingCount is the number of rules awaiting moderation.
+     *
+     * @generated from protobuf field: int64 rule_pending_count = 5
+     */
+    rulePendingCount: bigint;
 }
 /**
  * @generated from protobuf message elephant.spell.GetEntryRequest
@@ -326,6 +444,34 @@ export interface SetEntryRequest {
 export interface SetEntryResponse {
 }
 /**
+ * @generated from protobuf message elephant.spell.SetEntryStatusRequest
+ */
+export interface SetEntryStatusRequest {
+    /**
+     * Language the entry is for.
+     *
+     * @generated from protobuf field: string language = 1
+     */
+    language: string;
+    /**
+     * Text is the word or phrase to update.
+     *
+     * @generated from protobuf field: string text = 2
+     */
+    text: string;
+    /**
+     * Status to set, e.g. "accepted" or "pending".
+     *
+     * @generated from protobuf field: string status = 3
+     */
+    status: string;
+}
+/**
+ * @generated from protobuf message elephant.spell.SetEntryStatusResponse
+ */
+export interface SetEntryStatusResponse {
+}
+/**
  * @generated from protobuf message elephant.spell.DeleteEntryRequest
  */
 export interface DeleteEntryRequest {
@@ -346,6 +492,269 @@ export interface DeleteEntryRequest {
  * @generated from protobuf message elephant.spell.DeleteEntryResponse
  */
 export interface DeleteEntryResponse {
+}
+/**
+ * @generated from protobuf message elephant.spell.RenameEntryRequest
+ */
+export interface RenameEntryRequest {
+    /**
+     * Language the entry is for.
+     *
+     * @generated from protobuf field: string language = 1
+     */
+    language: string;
+    /**
+     * Text is the current entry text.
+     *
+     * @generated from protobuf field: string text = 2
+     */
+    text: string;
+    /**
+     * NewText is the text to rename the entry to.
+     *
+     * @generated from protobuf field: string new_text = 3
+     */
+    newText: string;
+}
+/**
+ * @generated from protobuf message elephant.spell.RenameEntryResponse
+ */
+export interface RenameEntryResponse {
+}
+/**
+ * Rule is a named pattern matcher. The pattern is matched against the text
+ * directly using a small DSL: "{digit}" matches a run of digits, "{word}" a run
+ * of letters, and "{gap}" / "{gap(N)}" up to 4 (or N) whitespace-separated
+ * words in between. Any other text is literal and, by default, matched
+ * case-insensitively. Whitespace is significant: a run of spaces means "one or
+ * more whitespace" and adjacency means none, so "{digit}-{digit}" matches
+ * "12-15" but not "12 - 15". The placeholders capture their match; reference
+ * them in the replacement template as {1}, {2}, … in order. For example
+ * "{digit}-{digit}" with replacement "{1}–{2}" turns "12-15" into "12–15".
+ *
+ * @generated from protobuf message elephant.spell.Rule
+ */
+export interface Rule {
+    /**
+     * ID is the sequential primary key of the rule. Zero when creating a new
+     * rule; the server assigns it.
+     *
+     * @generated from protobuf field: int64 id = 14
+     */
+    id: bigint;
+    /**
+     * Language the rule is for.
+     *
+     * @generated from protobuf field: string language = 1
+     */
+    language: string;
+    /**
+     * Name is a human-readable label for the rule. It is not unique.
+     *
+     * @generated from protobuf field: string name = 2
+     */
+    name: string;
+    /**
+     * Status of the rule, used for moderation.
+     *
+     * @generated from protobuf field: string status = 3
+     */
+    status: string;
+    /**
+     * Description shown to editors as context for the correction.
+     *
+     * @generated from protobuf field: string description = 4
+     */
+    description: string;
+    /**
+     * Level to use when offering corrections. Optional, defaults to LEVEL_ERROR.
+     *
+     * @generated from protobuf field: elephant.spell.CorrectionLevel level = 5
+     */
+    level: CorrectionLevel;
+    /**
+     * Pattern to match, in the rule DSL (see the message documentation).
+     *
+     * @generated from protobuf field: string pattern = 6
+     */
+    pattern: string;
+    /**
+     * Replacement template for the suggestion, referencing captures as {1}, {2}, …
+     *
+     * @generated from protobuf field: string replacement = 7
+     */
+    replacement: string;
+    /**
+     * Before, when set, only matches when immediately preceded by one of these
+     * words.
+     *
+     * @generated from protobuf field: repeated string before = 8
+     */
+    before: string[];
+    /**
+     * After, when set, only matches when immediately followed by one of these
+     * words.
+     *
+     * @generated from protobuf field: repeated string after = 9
+     */
+    after: string[];
+    /**
+     * NotBefore suppresses the match when preceded by one of these words.
+     *
+     * @generated from protobuf field: repeated string not_before = 10
+     */
+    notBefore: string[];
+    /**
+     * NotAfter suppresses the match when followed by one of these words.
+     *
+     * @generated from protobuf field: repeated string not_after = 11
+     */
+    notAfter: string[];
+    /**
+     * Updated is the last update time in RFC3339 format.
+     *
+     * @generated from protobuf field: string updated = 12
+     */
+    updated: string;
+    /**
+     * UpdatedBy is the identity of the party that last updated the rule.
+     *
+     * @generated from protobuf field: string updated_by = 13
+     */
+    updatedBy: string;
+    /**
+     * CaseSensitive matches the pattern and guards with their exact casing when
+     * set. Defaults to case-insensitive matching.
+     *
+     * @generated from protobuf field: bool case_sensitive = 15
+     */
+    caseSensitive: boolean;
+}
+/**
+ * @generated from protobuf message elephant.spell.ListRulesRequest
+ */
+export interface ListRulesRequest {
+    /**
+     * Language to list rules for.
+     *
+     * @generated from protobuf field: string language = 1
+     */
+    language: string;
+    /**
+     * Page to return.
+     *
+     * @generated from protobuf field: int64 page = 2
+     */
+    page: bigint;
+    /**
+     * Query filters rules by a free-text substring, matched against the name,
+     * description, pattern and replacement.
+     *
+     * @generated from protobuf field: string query = 3
+     */
+    query: string;
+    /**
+     * Status to filter rules by.
+     *
+     * @generated from protobuf field: string status = 4
+     */
+    status: string;
+    /**
+     * PageSize is the number of rules per page. Optional, defaults to 100.
+     *
+     * @generated from protobuf field: int64 page_size = 5
+     */
+    pageSize: bigint;
+}
+/**
+ * @generated from protobuf message elephant.spell.ListRulesResponse
+ */
+export interface ListRulesResponse {
+    /**
+     * @generated from protobuf field: repeated elephant.spell.Rule rules = 1
+     */
+    rules: Rule[];
+}
+/**
+ * @generated from protobuf message elephant.spell.GetRuleRequest
+ */
+export interface GetRuleRequest {
+    /**
+     * ID of the rule to get.
+     *
+     * @generated from protobuf field: int64 id = 1
+     */
+    id: bigint;
+}
+/**
+ * @generated from protobuf message elephant.spell.GetRuleResponse
+ */
+export interface GetRuleResponse {
+    /**
+     * @generated from protobuf field: elephant.spell.Rule rule = 1
+     */
+    rule?: Rule;
+}
+/**
+ * @generated from protobuf message elephant.spell.SetRuleRequest
+ */
+export interface SetRuleRequest {
+    /**
+     * Rule to set. A zero id creates a new rule; a non-zero id updates the
+     * existing rule with that id.
+     *
+     * @generated from protobuf field: elephant.spell.Rule rule = 1
+     */
+    rule?: Rule;
+}
+/**
+ * @generated from protobuf message elephant.spell.SetRuleResponse
+ */
+export interface SetRuleResponse {
+    /**
+     * ID of the created or updated rule.
+     *
+     * @generated from protobuf field: int64 id = 1
+     */
+    id: bigint;
+}
+/**
+ * @generated from protobuf message elephant.spell.SetRuleStatusRequest
+ */
+export interface SetRuleStatusRequest {
+    /**
+     * ID of the rule to update.
+     *
+     * @generated from protobuf field: int64 id = 1
+     */
+    id: bigint;
+    /**
+     * Status to set, e.g. "accepted" or "pending".
+     *
+     * @generated from protobuf field: string status = 2
+     */
+    status: string;
+}
+/**
+ * @generated from protobuf message elephant.spell.SetRuleStatusResponse
+ */
+export interface SetRuleStatusResponse {
+}
+/**
+ * @generated from protobuf message elephant.spell.DeleteRuleRequest
+ */
+export interface DeleteRuleRequest {
+    /**
+     * ID of the rule to delete.
+     *
+     * @generated from protobuf field: int64 id = 1
+     */
+    id: bigint;
+}
+/**
+ * @generated from protobuf message elephant.spell.DeleteRuleResponse
+ */
+export interface DeleteRuleResponse {
 }
 /**
  * @generated from protobuf enum elephant.spell.CorrectionLevel
@@ -502,7 +911,8 @@ class TextRequest$Type extends MessageType<TextRequest> {
         super("elephant.spell.TextRequest", [
             { no: 1, name: "text", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "suggestions", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+            { no: 3, name: "suggestions", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 4, name: "custom_only", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
     create(value?: PartialMessage<TextRequest>): TextRequest {
@@ -510,6 +920,7 @@ class TextRequest$Type extends MessageType<TextRequest> {
         message.text = [];
         message.language = "";
         message.suggestions = false;
+        message.customOnly = false;
         if (value !== undefined)
             reflectionMergePartial<TextRequest>(this, message, value);
         return message;
@@ -527,6 +938,9 @@ class TextRequest$Type extends MessageType<TextRequest> {
                     break;
                 case /* bool suggestions */ 3:
                     message.suggestions = reader.bool();
+                    break;
+                case /* bool custom_only */ 4:
+                    message.customOnly = reader.bool();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -549,6 +963,9 @@ class TextRequest$Type extends MessageType<TextRequest> {
         /* bool suggestions = 3; */
         if (message.suggestions !== false)
             writer.tag(3, WireType.Varint).bool(message.suggestions);
+        /* bool custom_only = 4; */
+        if (message.customOnly !== false)
+            writer.tag(4, WireType.Varint).bool(message.customOnly);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -659,7 +1076,9 @@ class MisspelledEntry$Type extends MessageType<MisspelledEntry> {
         super("elephant.spell.MisspelledEntry", [
             { no: 1, name: "text", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "suggestions", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Suggestion },
-            { no: 3, name: "level", kind: "enum", T: () => ["elephant.spell.CorrectionLevel", CorrectionLevel] }
+            { no: 3, name: "level", kind: "enum", T: () => ["elephant.spell.CorrectionLevel", CorrectionLevel] },
+            { no: 4, name: "status", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "spans", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => TextSpan }
         ]);
     }
     create(value?: PartialMessage<MisspelledEntry>): MisspelledEntry {
@@ -667,6 +1086,8 @@ class MisspelledEntry$Type extends MessageType<MisspelledEntry> {
         message.text = "";
         message.suggestions = [];
         message.level = 0;
+        message.status = "";
+        message.spans = [];
         if (value !== undefined)
             reflectionMergePartial<MisspelledEntry>(this, message, value);
         return message;
@@ -684,6 +1105,12 @@ class MisspelledEntry$Type extends MessageType<MisspelledEntry> {
                     break;
                 case /* elephant.spell.CorrectionLevel level */ 3:
                     message.level = reader.int32();
+                    break;
+                case /* string status */ 4:
+                    message.status = reader.string();
+                    break;
+                case /* repeated elephant.spell.TextSpan spans */ 5:
+                    message.spans.push(TextSpan.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -706,6 +1133,12 @@ class MisspelledEntry$Type extends MessageType<MisspelledEntry> {
         /* elephant.spell.CorrectionLevel level = 3; */
         if (message.level !== 0)
             writer.tag(3, WireType.Varint).int32(message.level);
+        /* string status = 4; */
+        if (message.status !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.status);
+        /* repeated elephant.spell.TextSpan spans = 5; */
+        for (let i = 0; i < message.spans.length; i++)
+            TextSpan.internalBinaryWrite(message.spans[i], writer.tag(5, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -717,17 +1150,74 @@ class MisspelledEntry$Type extends MessageType<MisspelledEntry> {
  */
 export const MisspelledEntry = new MisspelledEntry$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class TextSpan$Type extends MessageType<TextSpan> {
+    constructor() {
+        super("elephant.spell.TextSpan", [
+            { no: 1, name: "start", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 2, name: "end", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<TextSpan>): TextSpan {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.start = 0n;
+        message.end = 0n;
+        if (value !== undefined)
+            reflectionMergePartial<TextSpan>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: TextSpan): TextSpan {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 start */ 1:
+                    message.start = reader.int64().toBigInt();
+                    break;
+                case /* int64 end */ 2:
+                    message.end = reader.int64().toBigInt();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: TextSpan, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 start = 1; */
+        if (message.start !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.start);
+        /* int64 end = 2; */
+        if (message.end !== 0n)
+            writer.tag(2, WireType.Varint).int64(message.end);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.TextSpan
+ */
+export const TextSpan = new TextSpan$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class SuggestionsRequest$Type extends MessageType<SuggestionsRequest> {
     constructor() {
         super("elephant.spell.SuggestionsRequest", [
             { no: 1, name: "text", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "custom_only", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
     create(value?: PartialMessage<SuggestionsRequest>): SuggestionsRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.text = "";
         message.language = "";
+        message.customOnly = false;
         if (value !== undefined)
             reflectionMergePartial<SuggestionsRequest>(this, message, value);
         return message;
@@ -742,6 +1232,9 @@ class SuggestionsRequest$Type extends MessageType<SuggestionsRequest> {
                     break;
                 case /* string language */ 2:
                     message.language = reader.string();
+                    break;
+                case /* bool custom_only */ 3:
+                    message.customOnly = reader.bool();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -761,6 +1254,9 @@ class SuggestionsRequest$Type extends MessageType<SuggestionsRequest> {
         /* string language = 2; */
         if (message.language !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.language);
+        /* bool custom_only = 3; */
+        if (message.customOnly !== false)
+            writer.tag(3, WireType.Varint).bool(message.customOnly);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -879,16 +1375,18 @@ class ListEntriesRequest$Type extends MessageType<ListEntriesRequest> {
         super("elephant.spell.ListEntriesRequest", [
             { no: 1, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "page", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
-            { no: 3, name: "prefix", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "status", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 3, name: "query", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "status", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "page_size", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
         ]);
     }
     create(value?: PartialMessage<ListEntriesRequest>): ListEntriesRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.language = "";
         message.page = 0n;
-        message.prefix = "";
+        message.query = "";
         message.status = "";
+        message.pageSize = 0n;
         if (value !== undefined)
             reflectionMergePartial<ListEntriesRequest>(this, message, value);
         return message;
@@ -904,11 +1402,14 @@ class ListEntriesRequest$Type extends MessageType<ListEntriesRequest> {
                 case /* int64 page */ 2:
                     message.page = reader.int64().toBigInt();
                     break;
-                case /* string prefix */ 3:
-                    message.prefix = reader.string();
+                case /* string query */ 3:
+                    message.query = reader.string();
                     break;
                 case /* string status */ 4:
                     message.status = reader.string();
+                    break;
+                case /* int64 page_size */ 5:
+                    message.pageSize = reader.int64().toBigInt();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -928,12 +1429,15 @@ class ListEntriesRequest$Type extends MessageType<ListEntriesRequest> {
         /* int64 page = 2; */
         if (message.page !== 0n)
             writer.tag(2, WireType.Varint).int64(message.page);
-        /* string prefix = 3; */
-        if (message.prefix !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.prefix);
+        /* string query = 3; */
+        if (message.query !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.query);
         /* string status = 4; */
         if (message.status !== "")
             writer.tag(4, WireType.LengthDelimited).string(message.status);
+        /* int64 page_size = 5; */
+        if (message.pageSize !== 0n)
+            writer.tag(5, WireType.Varint).int64(message.pageSize);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -1003,7 +1507,12 @@ class CustomEntry$Type extends MessageType<CustomEntry> {
             { no: 6, name: "level", kind: "enum", T: () => ["elephant.spell.CorrectionLevel", CorrectionLevel] },
             { no: 7, name: "forms", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } },
             { no: 8, name: "updated", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 9, name: "updated_by", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 9, name: "updated_by", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 10, name: "case_sensitive", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 11, name: "before", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 12, name: "after", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 13, name: "not_before", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 14, name: "not_after", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<CustomEntry>): CustomEntry {
@@ -1017,6 +1526,11 @@ class CustomEntry$Type extends MessageType<CustomEntry> {
         message.forms = {};
         message.updated = "";
         message.updatedBy = "";
+        message.caseSensitive = false;
+        message.before = [];
+        message.after = [];
+        message.notBefore = [];
+        message.notAfter = [];
         if (value !== undefined)
             reflectionMergePartial<CustomEntry>(this, message, value);
         return message;
@@ -1052,6 +1566,21 @@ class CustomEntry$Type extends MessageType<CustomEntry> {
                     break;
                 case /* string updated_by */ 9:
                     message.updatedBy = reader.string();
+                    break;
+                case /* bool case_sensitive */ 10:
+                    message.caseSensitive = reader.bool();
+                    break;
+                case /* repeated string before */ 11:
+                    message.before.push(reader.string());
+                    break;
+                case /* repeated string after */ 12:
+                    message.after.push(reader.string());
+                    break;
+                case /* repeated string not_before */ 13:
+                    message.notBefore.push(reader.string());
+                    break;
+                case /* repeated string not_after */ 14:
+                    message.notAfter.push(reader.string());
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -1108,6 +1637,21 @@ class CustomEntry$Type extends MessageType<CustomEntry> {
         /* string updated_by = 9; */
         if (message.updatedBy !== "")
             writer.tag(9, WireType.LengthDelimited).string(message.updatedBy);
+        /* bool case_sensitive = 10; */
+        if (message.caseSensitive !== false)
+            writer.tag(10, WireType.Varint).bool(message.caseSensitive);
+        /* repeated string before = 11; */
+        for (let i = 0; i < message.before.length; i++)
+            writer.tag(11, WireType.LengthDelimited).string(message.before[i]);
+        /* repeated string after = 12; */
+        for (let i = 0; i < message.after.length; i++)
+            writer.tag(12, WireType.LengthDelimited).string(message.after[i]);
+        /* repeated string not_before = 13; */
+        for (let i = 0; i < message.notBefore.length; i++)
+            writer.tag(13, WireType.LengthDelimited).string(message.notBefore[i]);
+        /* repeated string not_after = 14; */
+        for (let i = 0; i < message.notAfter.length; i++)
+            writer.tag(14, WireType.LengthDelimited).string(message.notAfter[i]);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -1208,13 +1752,19 @@ class CustomDictionary$Type extends MessageType<CustomDictionary> {
     constructor() {
         super("elephant.spell.CustomDictionary", [
             { no: 1, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "entry_count", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+            { no: 2, name: "entry_count", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 3, name: "pending_count", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 4, name: "rule_count", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 5, name: "rule_pending_count", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
         ]);
     }
     create(value?: PartialMessage<CustomDictionary>): CustomDictionary {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.language = "";
         message.entryCount = 0n;
+        message.pendingCount = 0n;
+        message.ruleCount = 0n;
+        message.rulePendingCount = 0n;
         if (value !== undefined)
             reflectionMergePartial<CustomDictionary>(this, message, value);
         return message;
@@ -1229,6 +1779,15 @@ class CustomDictionary$Type extends MessageType<CustomDictionary> {
                     break;
                 case /* int64 entry_count */ 2:
                     message.entryCount = reader.int64().toBigInt();
+                    break;
+                case /* int64 pending_count */ 3:
+                    message.pendingCount = reader.int64().toBigInt();
+                    break;
+                case /* int64 rule_count */ 4:
+                    message.ruleCount = reader.int64().toBigInt();
+                    break;
+                case /* int64 rule_pending_count */ 5:
+                    message.rulePendingCount = reader.int64().toBigInt();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -1248,6 +1807,15 @@ class CustomDictionary$Type extends MessageType<CustomDictionary> {
         /* int64 entry_count = 2; */
         if (message.entryCount !== 0n)
             writer.tag(2, WireType.Varint).int64(message.entryCount);
+        /* int64 pending_count = 3; */
+        if (message.pendingCount !== 0n)
+            writer.tag(3, WireType.Varint).int64(message.pendingCount);
+        /* int64 rule_count = 4; */
+        if (message.ruleCount !== 0n)
+            writer.tag(4, WireType.Varint).int64(message.ruleCount);
+        /* int64 rule_pending_count = 5; */
+        if (message.rulePendingCount !== 0n)
+            writer.tag(5, WireType.Varint).int64(message.rulePendingCount);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -1444,6 +2012,107 @@ class SetEntryResponse$Type extends MessageType<SetEntryResponse> {
  */
 export const SetEntryResponse = new SetEntryResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class SetEntryStatusRequest$Type extends MessageType<SetEntryStatusRequest> {
+    constructor() {
+        super("elephant.spell.SetEntryStatusRequest", [
+            { no: 1, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "text", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "status", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<SetEntryStatusRequest>): SetEntryStatusRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.language = "";
+        message.text = "";
+        message.status = "";
+        if (value !== undefined)
+            reflectionMergePartial<SetEntryStatusRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetEntryStatusRequest): SetEntryStatusRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string language */ 1:
+                    message.language = reader.string();
+                    break;
+                case /* string text */ 2:
+                    message.text = reader.string();
+                    break;
+                case /* string status */ 3:
+                    message.status = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SetEntryStatusRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string language = 1; */
+        if (message.language !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.language);
+        /* string text = 2; */
+        if (message.text !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.text);
+        /* string status = 3; */
+        if (message.status !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.status);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.SetEntryStatusRequest
+ */
+export const SetEntryStatusRequest = new SetEntryStatusRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SetEntryStatusResponse$Type extends MessageType<SetEntryStatusResponse> {
+    constructor() {
+        super("elephant.spell.SetEntryStatusResponse", []);
+    }
+    create(value?: PartialMessage<SetEntryStatusResponse>): SetEntryStatusResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<SetEntryStatusResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetEntryStatusResponse): SetEntryStatusResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SetEntryStatusResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.SetEntryStatusResponse
+ */
+export const SetEntryStatusResponse = new SetEntryStatusResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class DeleteEntryRequest$Type extends MessageType<DeleteEntryRequest> {
     constructor() {
         super("elephant.spell.DeleteEntryRequest", [
@@ -1536,6 +2205,756 @@ class DeleteEntryResponse$Type extends MessageType<DeleteEntryResponse> {
  * @generated MessageType for protobuf message elephant.spell.DeleteEntryResponse
  */
 export const DeleteEntryResponse = new DeleteEntryResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class RenameEntryRequest$Type extends MessageType<RenameEntryRequest> {
+    constructor() {
+        super("elephant.spell.RenameEntryRequest", [
+            { no: 1, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "text", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "new_text", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<RenameEntryRequest>): RenameEntryRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.language = "";
+        message.text = "";
+        message.newText = "";
+        if (value !== undefined)
+            reflectionMergePartial<RenameEntryRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RenameEntryRequest): RenameEntryRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string language */ 1:
+                    message.language = reader.string();
+                    break;
+                case /* string text */ 2:
+                    message.text = reader.string();
+                    break;
+                case /* string new_text */ 3:
+                    message.newText = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: RenameEntryRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string language = 1; */
+        if (message.language !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.language);
+        /* string text = 2; */
+        if (message.text !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.text);
+        /* string new_text = 3; */
+        if (message.newText !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.newText);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.RenameEntryRequest
+ */
+export const RenameEntryRequest = new RenameEntryRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class RenameEntryResponse$Type extends MessageType<RenameEntryResponse> {
+    constructor() {
+        super("elephant.spell.RenameEntryResponse", []);
+    }
+    create(value?: PartialMessage<RenameEntryResponse>): RenameEntryResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<RenameEntryResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RenameEntryResponse): RenameEntryResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: RenameEntryResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.RenameEntryResponse
+ */
+export const RenameEntryResponse = new RenameEntryResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Rule$Type extends MessageType<Rule> {
+    constructor() {
+        super("elephant.spell.Rule", [
+            { no: 14, name: "id", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 1, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "status", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "level", kind: "enum", T: () => ["elephant.spell.CorrectionLevel", CorrectionLevel] },
+            { no: 6, name: "pattern", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "replacement", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 8, name: "before", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 9, name: "after", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 10, name: "not_before", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 11, name: "not_after", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 12, name: "updated", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 13, name: "updated_by", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 15, name: "case_sensitive", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Rule>): Rule {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.id = 0n;
+        message.language = "";
+        message.name = "";
+        message.status = "";
+        message.description = "";
+        message.level = 0;
+        message.pattern = "";
+        message.replacement = "";
+        message.before = [];
+        message.after = [];
+        message.notBefore = [];
+        message.notAfter = [];
+        message.updated = "";
+        message.updatedBy = "";
+        message.caseSensitive = false;
+        if (value !== undefined)
+            reflectionMergePartial<Rule>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Rule): Rule {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 id */ 14:
+                    message.id = reader.int64().toBigInt();
+                    break;
+                case /* string language */ 1:
+                    message.language = reader.string();
+                    break;
+                case /* string name */ 2:
+                    message.name = reader.string();
+                    break;
+                case /* string status */ 3:
+                    message.status = reader.string();
+                    break;
+                case /* string description */ 4:
+                    message.description = reader.string();
+                    break;
+                case /* elephant.spell.CorrectionLevel level */ 5:
+                    message.level = reader.int32();
+                    break;
+                case /* string pattern */ 6:
+                    message.pattern = reader.string();
+                    break;
+                case /* string replacement */ 7:
+                    message.replacement = reader.string();
+                    break;
+                case /* repeated string before */ 8:
+                    message.before.push(reader.string());
+                    break;
+                case /* repeated string after */ 9:
+                    message.after.push(reader.string());
+                    break;
+                case /* repeated string not_before */ 10:
+                    message.notBefore.push(reader.string());
+                    break;
+                case /* repeated string not_after */ 11:
+                    message.notAfter.push(reader.string());
+                    break;
+                case /* string updated */ 12:
+                    message.updated = reader.string();
+                    break;
+                case /* string updated_by */ 13:
+                    message.updatedBy = reader.string();
+                    break;
+                case /* bool case_sensitive */ 15:
+                    message.caseSensitive = reader.bool();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Rule, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string language = 1; */
+        if (message.language !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.language);
+        /* string name = 2; */
+        if (message.name !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.name);
+        /* string status = 3; */
+        if (message.status !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.status);
+        /* string description = 4; */
+        if (message.description !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.description);
+        /* elephant.spell.CorrectionLevel level = 5; */
+        if (message.level !== 0)
+            writer.tag(5, WireType.Varint).int32(message.level);
+        /* string pattern = 6; */
+        if (message.pattern !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.pattern);
+        /* string replacement = 7; */
+        if (message.replacement !== "")
+            writer.tag(7, WireType.LengthDelimited).string(message.replacement);
+        /* repeated string before = 8; */
+        for (let i = 0; i < message.before.length; i++)
+            writer.tag(8, WireType.LengthDelimited).string(message.before[i]);
+        /* repeated string after = 9; */
+        for (let i = 0; i < message.after.length; i++)
+            writer.tag(9, WireType.LengthDelimited).string(message.after[i]);
+        /* repeated string not_before = 10; */
+        for (let i = 0; i < message.notBefore.length; i++)
+            writer.tag(10, WireType.LengthDelimited).string(message.notBefore[i]);
+        /* repeated string not_after = 11; */
+        for (let i = 0; i < message.notAfter.length; i++)
+            writer.tag(11, WireType.LengthDelimited).string(message.notAfter[i]);
+        /* string updated = 12; */
+        if (message.updated !== "")
+            writer.tag(12, WireType.LengthDelimited).string(message.updated);
+        /* string updated_by = 13; */
+        if (message.updatedBy !== "")
+            writer.tag(13, WireType.LengthDelimited).string(message.updatedBy);
+        /* int64 id = 14; */
+        if (message.id !== 0n)
+            writer.tag(14, WireType.Varint).int64(message.id);
+        /* bool case_sensitive = 15; */
+        if (message.caseSensitive !== false)
+            writer.tag(15, WireType.Varint).bool(message.caseSensitive);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.Rule
+ */
+export const Rule = new Rule$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ListRulesRequest$Type extends MessageType<ListRulesRequest> {
+    constructor() {
+        super("elephant.spell.ListRulesRequest", [
+            { no: 1, name: "language", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "page", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 3, name: "query", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "status", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "page_size", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ListRulesRequest>): ListRulesRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.language = "";
+        message.page = 0n;
+        message.query = "";
+        message.status = "";
+        message.pageSize = 0n;
+        if (value !== undefined)
+            reflectionMergePartial<ListRulesRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ListRulesRequest): ListRulesRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string language */ 1:
+                    message.language = reader.string();
+                    break;
+                case /* int64 page */ 2:
+                    message.page = reader.int64().toBigInt();
+                    break;
+                case /* string query */ 3:
+                    message.query = reader.string();
+                    break;
+                case /* string status */ 4:
+                    message.status = reader.string();
+                    break;
+                case /* int64 page_size */ 5:
+                    message.pageSize = reader.int64().toBigInt();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ListRulesRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string language = 1; */
+        if (message.language !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.language);
+        /* int64 page = 2; */
+        if (message.page !== 0n)
+            writer.tag(2, WireType.Varint).int64(message.page);
+        /* string query = 3; */
+        if (message.query !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.query);
+        /* string status = 4; */
+        if (message.status !== "")
+            writer.tag(4, WireType.LengthDelimited).string(message.status);
+        /* int64 page_size = 5; */
+        if (message.pageSize !== 0n)
+            writer.tag(5, WireType.Varint).int64(message.pageSize);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.ListRulesRequest
+ */
+export const ListRulesRequest = new ListRulesRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ListRulesResponse$Type extends MessageType<ListRulesResponse> {
+    constructor() {
+        super("elephant.spell.ListRulesResponse", [
+            { no: 1, name: "rules", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Rule }
+        ]);
+    }
+    create(value?: PartialMessage<ListRulesResponse>): ListRulesResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.rules = [];
+        if (value !== undefined)
+            reflectionMergePartial<ListRulesResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ListRulesResponse): ListRulesResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated elephant.spell.Rule rules */ 1:
+                    message.rules.push(Rule.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ListRulesResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated elephant.spell.Rule rules = 1; */
+        for (let i = 0; i < message.rules.length; i++)
+            Rule.internalBinaryWrite(message.rules[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.ListRulesResponse
+ */
+export const ListRulesResponse = new ListRulesResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetRuleRequest$Type extends MessageType<GetRuleRequest> {
+    constructor() {
+        super("elephant.spell.GetRuleRequest", [
+            { no: 1, name: "id", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetRuleRequest>): GetRuleRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.id = 0n;
+        if (value !== undefined)
+            reflectionMergePartial<GetRuleRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetRuleRequest): GetRuleRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 id */ 1:
+                    message.id = reader.int64().toBigInt();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetRuleRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 id = 1; */
+        if (message.id !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.id);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.GetRuleRequest
+ */
+export const GetRuleRequest = new GetRuleRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetRuleResponse$Type extends MessageType<GetRuleResponse> {
+    constructor() {
+        super("elephant.spell.GetRuleResponse", [
+            { no: 1, name: "rule", kind: "message", T: () => Rule }
+        ]);
+    }
+    create(value?: PartialMessage<GetRuleResponse>): GetRuleResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<GetRuleResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetRuleResponse): GetRuleResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* elephant.spell.Rule rule */ 1:
+                    message.rule = Rule.internalBinaryRead(reader, reader.uint32(), options, message.rule);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetRuleResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* elephant.spell.Rule rule = 1; */
+        if (message.rule)
+            Rule.internalBinaryWrite(message.rule, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.GetRuleResponse
+ */
+export const GetRuleResponse = new GetRuleResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SetRuleRequest$Type extends MessageType<SetRuleRequest> {
+    constructor() {
+        super("elephant.spell.SetRuleRequest", [
+            { no: 1, name: "rule", kind: "message", T: () => Rule }
+        ]);
+    }
+    create(value?: PartialMessage<SetRuleRequest>): SetRuleRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<SetRuleRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetRuleRequest): SetRuleRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* elephant.spell.Rule rule */ 1:
+                    message.rule = Rule.internalBinaryRead(reader, reader.uint32(), options, message.rule);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SetRuleRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* elephant.spell.Rule rule = 1; */
+        if (message.rule)
+            Rule.internalBinaryWrite(message.rule, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.SetRuleRequest
+ */
+export const SetRuleRequest = new SetRuleRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SetRuleResponse$Type extends MessageType<SetRuleResponse> {
+    constructor() {
+        super("elephant.spell.SetRuleResponse", [
+            { no: 1, name: "id", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<SetRuleResponse>): SetRuleResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.id = 0n;
+        if (value !== undefined)
+            reflectionMergePartial<SetRuleResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetRuleResponse): SetRuleResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 id */ 1:
+                    message.id = reader.int64().toBigInt();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SetRuleResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 id = 1; */
+        if (message.id !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.id);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.SetRuleResponse
+ */
+export const SetRuleResponse = new SetRuleResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SetRuleStatusRequest$Type extends MessageType<SetRuleStatusRequest> {
+    constructor() {
+        super("elephant.spell.SetRuleStatusRequest", [
+            { no: 1, name: "id", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 2, name: "status", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<SetRuleStatusRequest>): SetRuleStatusRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.id = 0n;
+        message.status = "";
+        if (value !== undefined)
+            reflectionMergePartial<SetRuleStatusRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetRuleStatusRequest): SetRuleStatusRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 id */ 1:
+                    message.id = reader.int64().toBigInt();
+                    break;
+                case /* string status */ 2:
+                    message.status = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SetRuleStatusRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 id = 1; */
+        if (message.id !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.id);
+        /* string status = 2; */
+        if (message.status !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.status);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.SetRuleStatusRequest
+ */
+export const SetRuleStatusRequest = new SetRuleStatusRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SetRuleStatusResponse$Type extends MessageType<SetRuleStatusResponse> {
+    constructor() {
+        super("elephant.spell.SetRuleStatusResponse", []);
+    }
+    create(value?: PartialMessage<SetRuleStatusResponse>): SetRuleStatusResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<SetRuleStatusResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SetRuleStatusResponse): SetRuleStatusResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SetRuleStatusResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.SetRuleStatusResponse
+ */
+export const SetRuleStatusResponse = new SetRuleStatusResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeleteRuleRequest$Type extends MessageType<DeleteRuleRequest> {
+    constructor() {
+        super("elephant.spell.DeleteRuleRequest", [
+            { no: 1, name: "id", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<DeleteRuleRequest>): DeleteRuleRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.id = 0n;
+        if (value !== undefined)
+            reflectionMergePartial<DeleteRuleRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteRuleRequest): DeleteRuleRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int64 id */ 1:
+                    message.id = reader.int64().toBigInt();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeleteRuleRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int64 id = 1; */
+        if (message.id !== 0n)
+            writer.tag(1, WireType.Varint).int64(message.id);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.DeleteRuleRequest
+ */
+export const DeleteRuleRequest = new DeleteRuleRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class DeleteRuleResponse$Type extends MessageType<DeleteRuleResponse> {
+    constructor() {
+        super("elephant.spell.DeleteRuleResponse", []);
+    }
+    create(value?: PartialMessage<DeleteRuleResponse>): DeleteRuleResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<DeleteRuleResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DeleteRuleResponse): DeleteRuleResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: DeleteRuleResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.spell.DeleteRuleResponse
+ */
+export const DeleteRuleResponse = new DeleteRuleResponse$Type();
 /**
  * @generated ServiceType for protobuf service elephant.spell.Check
  */
@@ -1552,5 +2971,17 @@ export const Dictionaries = new ServiceType("elephant.spell.Dictionaries", [
     { name: "ListEntries", options: {}, I: ListEntriesRequest, O: ListEntriesResponse },
     { name: "GetEntry", options: {}, I: GetEntryRequest, O: GetEntryResponse },
     { name: "SetEntry", options: {}, I: SetEntryRequest, O: SetEntryResponse },
-    { name: "DeleteEntry", options: {}, I: DeleteEntryRequest, O: DeleteEntryResponse }
+    { name: "SetEntryStatus", options: {}, I: SetEntryStatusRequest, O: SetEntryStatusResponse },
+    { name: "DeleteEntry", options: {}, I: DeleteEntryRequest, O: DeleteEntryResponse },
+    { name: "RenameEntry", options: {}, I: RenameEntryRequest, O: RenameEntryResponse }
+]);
+/**
+ * @generated ServiceType for protobuf service elephant.spell.Rules
+ */
+export const Rules = new ServiceType("elephant.spell.Rules", [
+    { name: "ListRules", options: {}, I: ListRulesRequest, O: ListRulesResponse },
+    { name: "GetRule", options: {}, I: GetRuleRequest, O: GetRuleResponse },
+    { name: "SetRule", options: {}, I: SetRuleRequest, O: SetRuleResponse },
+    { name: "SetRuleStatus", options: {}, I: SetRuleStatusRequest, O: SetRuleStatusResponse },
+    { name: "DeleteRule", options: {}, I: DeleteRuleRequest, O: DeleteRuleResponse }
 ]);

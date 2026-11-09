@@ -25,8 +25,16 @@ service Dictionaries {
   rpc GetEntry(GetEntryRequest) returns (GetEntryResponse);
   // SetEntry is used to add or update custom dictionary entries.
   rpc SetEntry(SetEntryRequest) returns (SetEntryResponse);
+  // SetEntryStatus updates only the moderation status of an entry. It is a
+  // lightweight alternative to SetEntry for accept/reject workflows that don't
+  // need to round-trip the whole entry.
+  rpc SetEntryStatus(SetEntryStatusRequest) returns (SetEntryStatusResponse);
   // DeleteEntry is used to remove an entry.
   rpc DeleteEntry(DeleteEntryRequest) returns (DeleteEntryResponse);
+  // RenameEntry changes the text of a custom dictionary entry, keeping the rest
+  // of its data. The text is the entry's identity, so renaming is a dedicated
+  // operation rather than a SetEntry.
+  rpc RenameEntry(RenameEntryRequest) returns (RenameEntryResponse);
 }
 
 message SupportedLanguagesRequest {}
@@ -50,6 +58,10 @@ message TextRequest {
   // interactive applications this should normally be done by calling the
   // Suggestions method on demand.
   bool suggestions         = 3;
+  // CustomOnly limits checks to the custom dictionary and rules, skipping the
+  // hunspell pass. Useful when you only want to surface custom corrections
+  // without the noise of hunspell results.
+  bool custom_only         = 4;
 }
 
 message TextResponse {
@@ -67,6 +79,27 @@ message MisspelledEntry {
   repeated Suggestion suggestions = 2;
   // Level is the level of the correction.
   CorrectionLevel level           = 3;
+  // Status of the custom entry the correction is based on, e.g. "accepted" or
+  // "pending". Empty for corrections that don't originate from a custom entry
+  // (such as plain hunspell results). Clients can use this to indicate that a
+  // correction comes from an unreviewed (pending) entry.
+  string status                   = 4;
+  // Spans are the character ranges in the source text where this specific
+  // correction applies. The same text can occur several times with different
+  // outcomes (e.g. only one occurrence is corrected), so clients should act on
+  // these ranges rather than searching for the text. Empty for corrections that
+  // apply wherever the text appears, such as plain hunspell results.
+  repeated TextSpan spans         = 5;
+}
+
+// TextSpan is a half-open range [start, end) into a source text, counted in
+// Unicode characters (code points / runes), not bytes. For text within the
+// Basic Multilingual Plane this matches JavaScript/UTF-16 string offsets.
+message TextSpan {
+  // Start is the character offset of the match in the source text.
+  int64 start = 1;
+  // End is the character offset just past the match.
+  int64 end   = 2;
 }
 
 enum CorrectionLevel {
@@ -80,6 +113,9 @@ message SuggestionsRequest {
   string text              = 1;
   // Language to get suggestions in.
   string language          = 2;
+  // CustomOnly limits suggestions to the custom dictionary and rules, skipping
+  // the hunspell pass.
+  bool custom_only         = 3;
 }
 
 message SuggestionsResponse {
@@ -97,10 +133,14 @@ message ListEntriesRequest {
   string language = 1;
   // Page to return.
   int64 page      = 2;
-  // Prefix to filter entries by.
-  string prefix   = 3;
+  // Query filters entries by a free-text substring, matched against the entry
+  // text, its description, and its common mistakes.
+  string query    = 3;
   // Status to filter entries by
   string status   = 4;
+  // PageSize is the number of entries to return per page. Optional, defaults to
+  // 100 when zero.
+  int64 page_size = 5;
 }
 
 message ListEntriesResponse {
@@ -116,8 +156,8 @@ message CustomEntry {
   string status                   = 3;
   // Description of the entry.
   string description              = 4;
-  // CommonMistakes when writing the word or phrase. This is used to pre-filter
-  // text that is spell-checked.
+  // CommonMistakes are misspellings or alternative spellings that should be
+  // flagged and corrected to the entry text. Supports {A|B} expansion.
   repeated string common_mistakes = 5;
   // Level to use when offering corrections based on this entry. Optional,
   // defaults to LEVEL_ERROR.
@@ -130,6 +170,23 @@ message CustomEntry {
   string updated                  = 8;
   // UpdatedBy is the identity of the party that last updated the entry.
   string updated_by               = 9;
+  // CaseSensitive controls whether the entry matches only with the exact casing
+  // of its text and common mistakes. Defaults to false (case-insensitive
+  // matching), which suits ordinary words. Enable it for proper nouns; a
+  // case-sensitive entry additionally flags leading-letter miscasings of its
+  // text and common mistakes (e.g. "mexico city") and suggests the exact
+  // casing.
+  bool case_sensitive             = 10;
+  // Before, when set, only flags a match when immediately preceded by one of
+  // these words.
+  repeated string before          = 11;
+  // After, when set, only flags a match when immediately followed by one of
+  // these words.
+  repeated string after           = 12;
+  // NotBefore suppresses the match when preceded by one of these words.
+  repeated string not_before      = 13;
+  // NotAfter suppresses the match when followed by one of these words.
+  repeated string not_after       = 14;
 }
 
 message ListDictionariesRequest {}
@@ -143,6 +200,12 @@ message CustomDictionary {
   string language  = 1;
   // EntryCount for the dictionary.
   int64 entry_count = 2;
+  // PendingCount is the number of entries awaiting moderation.
+  int64 pending_count = 3;
+  // RuleCount is the number of pattern rules for the language.
+  int64 rule_count = 4;
+  // RulePendingCount is the number of rules awaiting moderation.
+  int64 rule_pending_count = 5;
 }
 
 message GetEntryRequest {
@@ -165,11 +228,149 @@ message SetEntryRequest {
 
 message SetEntryResponse {}
 
+message SetEntryStatusRequest {
+  // Language the entry is for.
+  string language = 1;
+  // Text is the word or phrase to update.
+  string text     = 2;
+  // Status to set, e.g. "accepted" or "pending".
+  string status   = 3;
+}
+
+message SetEntryStatusResponse {}
+
 message DeleteEntryRequest {
   // Language the entry is for.
   string language = 1;
   // Text is the word or phrase to delete.
-  string text     = 2;  
+  string text     = 2;
 }
 
 message DeleteEntryResponse {}
+
+message RenameEntryRequest {
+  // Language the entry is for.
+  string language = 1;
+  // Text is the current entry text.
+  string text     = 2;
+  // NewText is the text to rename the entry to.
+  string new_text = 3;
+}
+
+message RenameEntryResponse {}
+
+// Rules manages pattern rules, which match a text pattern with placeholders
+// rather than fixed strings. They are a separate kind of entity from dictionary
+// words.
+service Rules {
+  // ListRules lists pattern rules.
+  rpc ListRules(ListRulesRequest) returns (ListRulesResponse);
+  // GetRule returns the details of a single rule.
+  rpc GetRule(GetRuleRequest) returns (GetRuleResponse);
+  // SetRule adds or updates a rule.
+  rpc SetRule(SetRuleRequest) returns (SetRuleResponse);
+  // SetRuleStatus updates only the moderation status of a rule.
+  rpc SetRuleStatus(SetRuleStatusRequest) returns (SetRuleStatusResponse);
+  // DeleteRule removes a rule.
+  rpc DeleteRule(DeleteRuleRequest) returns (DeleteRuleResponse);
+}
+
+// Rule is a named pattern matcher. The pattern is matched against the text
+// directly using a small DSL: "{digit}" matches a run of digits, "{word}" a run
+// of letters, and "{gap}" / "{gap(N)}" up to 4 (or N) whitespace-separated
+// words in between. Any other text is literal and, by default, matched
+// case-insensitively. Whitespace is significant: a run of spaces means "one or
+// more whitespace" and adjacency means none, so "{digit}-{digit}" matches
+// "12-15" but not "12 - 15". The placeholders capture their match; reference
+// them in the replacement template as {1}, {2}, … in order. For example
+// "{digit}-{digit}" with replacement "{1}–{2}" turns "12-15" into "12–15".
+message Rule {
+  // ID is the sequential primary key of the rule. Zero when creating a new
+  // rule; the server assigns it.
+  int64 id                   = 14;
+  // Language the rule is for.
+  string language            = 1;
+  // Name is a human-readable label for the rule. It is not unique.
+  string name                = 2;
+  // Status of the rule, used for moderation.
+  string status              = 3;
+  // Description shown to editors as context for the correction.
+  string description         = 4;
+  // Level to use when offering corrections. Optional, defaults to LEVEL_ERROR.
+  CorrectionLevel level      = 5;
+  // Pattern to match, in the rule DSL (see the message documentation).
+  string pattern             = 6;
+  // Replacement template for the suggestion, referencing captures as {1}, {2}, …
+  string replacement         = 7;
+  // Before, when set, only matches when immediately preceded by one of these
+  // words.
+  repeated string before     = 8;
+  // After, when set, only matches when immediately followed by one of these
+  // words.
+  repeated string after      = 9;
+  // NotBefore suppresses the match when preceded by one of these words.
+  repeated string not_before = 10;
+  // NotAfter suppresses the match when followed by one of these words.
+  repeated string not_after  = 11;
+  // Updated is the last update time in RFC3339 format.
+  string updated             = 12;
+  // UpdatedBy is the identity of the party that last updated the rule.
+  string updated_by          = 13;
+  // CaseSensitive matches the pattern and guards with their exact casing when
+  // set. Defaults to case-insensitive matching.
+  bool case_sensitive        = 15;
+}
+
+message ListRulesRequest {
+  // Language to list rules for.
+  string language = 1;
+  // Page to return.
+  int64 page      = 2;
+  // Query filters rules by a free-text substring, matched against the name,
+  // description, pattern and replacement.
+  string query    = 3;
+  // Status to filter rules by.
+  string status   = 4;
+  // PageSize is the number of rules per page. Optional, defaults to 100.
+  int64 page_size = 5;
+}
+
+message ListRulesResponse {
+  repeated Rule rules = 1;
+}
+
+message GetRuleRequest {
+  // ID of the rule to get.
+  int64 id = 1;
+}
+
+message GetRuleResponse {
+  Rule rule = 1;
+}
+
+message SetRuleRequest {
+  // Rule to set. A zero id creates a new rule; a non-zero id updates the
+  // existing rule with that id.
+  Rule rule = 1;
+}
+
+message SetRuleResponse {
+  // ID of the created or updated rule.
+  int64 id = 1;
+}
+
+message SetRuleStatusRequest {
+  // ID of the rule to update.
+  int64 id      = 1;
+  // Status to set, e.g. "accepted" or "pending".
+  string status = 2;
+}
+
+message SetRuleStatusResponse {}
+
+message DeleteRuleRequest {
+  // ID of the rule to delete.
+  int64 id = 1;
+}
+
+message DeleteRuleResponse {}

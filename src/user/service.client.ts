@@ -3,6 +3,21 @@
 // @generated from protobuf file "user/service.proto" (package "elephant.user", syntax proto3)
 // tslint:disable
 // @ts-nocheck
+import { Configuration } from "./service";
+import type { UpdateDeprecationResponse } from "./service";
+import type { UpdateDeprecationRequest } from "./service";
+import type { GetDeprecationsResponse } from "./service";
+import type { GetDeprecationsRequest } from "./service";
+import type { GetSchemaResponse } from "./service";
+import type { GetSchemaRequest } from "./service";
+import type { ListConfigGenerationsResponse } from "./service";
+import type { ListConfigGenerationsRequest } from "./service";
+import type { GetActiveConfigGenerationResponse } from "./service";
+import type { GetActiveConfigGenerationRequest } from "./service";
+import type { ActivateConfigGenerationResponse } from "./service";
+import type { ActivateConfigGenerationRequest } from "./service";
+import type { RegisterConfigGenerationResponse } from "./service";
+import type { RegisterConfigGenerationRequest } from "./service";
 import { Messages } from "./service";
 import type { DeleteInboxMessageResponse } from "./service";
 import type { DeleteInboxMessageRequest } from "./service";
@@ -305,5 +320,147 @@ export class MessagesClient implements IMessagesClient, ServiceInfo {
     deleteInboxMessage(input: DeleteInboxMessageRequest, options?: RpcOptions): UnaryCall<DeleteInboxMessageRequest, DeleteInboxMessageResponse> {
         const method = this.methods[6], opt = this._transport.mergeOptions(options);
         return stackIntercept<DeleteInboxMessageRequest, DeleteInboxMessageResponse>("unary", this._transport, method, opt, input);
+    }
+}
+/**
+ * Configuration manages the revisor schemas that the user service
+ * validates settings documents and inbox messages against. Schemas are
+ * grouped into config generations that are registered and switched
+ * atomically.
+ *
+ * @generated from protobuf service elephant.user.Configuration
+ */
+export interface IConfigurationClient {
+    /**
+     * Registers a new config generation. Registration is idempotent: a
+     * generation containing the same set of schemas returns the already
+     * registered generation (its description is left unchanged). If
+     * activate is set and the matched generation is inactive it will be
+     * activated.
+     *
+     * @generated from protobuf rpc: RegisterConfigGeneration
+     */
+    registerConfigGeneration(input: RegisterConfigGenerationRequest, options?: RpcOptions): UnaryCall<RegisterConfigGenerationRequest, RegisterConfigGenerationResponse>;
+    /**
+     * Activates a registered config generation, deactivating the
+     * previously active generation.
+     *
+     * @generated from protobuf rpc: ActivateConfigGeneration
+     */
+    activateConfigGeneration(input: ActivateConfigGenerationRequest, options?: RpcOptions): UnaryCall<ActivateConfigGenerationRequest, ActivateConfigGenerationResponse>;
+    /**
+     * Gets the currently active config generation. Supports long-polling
+     * for generation changes.
+     *
+     * @generated from protobuf rpc: GetActiveConfigGeneration
+     */
+    getActiveConfigGeneration(input: GetActiveConfigGenerationRequest, options?: RpcOptions): UnaryCall<GetActiveConfigGenerationRequest, GetActiveConfigGenerationResponse>;
+    /**
+     * Lists registered config generations, newest first.
+     *
+     * @generated from protobuf rpc: ListConfigGenerations
+     */
+    listConfigGenerations(input: ListConfigGenerationsRequest, options?: RpcOptions): UnaryCall<ListConfigGenerationsRequest, ListConfigGenerationsResponse>;
+    /**
+     * Gets a stored schema.
+     *
+     * @generated from protobuf rpc: GetSchema
+     */
+    getSchema(input: GetSchemaRequest, options?: RpcOptions): UnaryCall<GetSchemaRequest, GetSchemaResponse>;
+    /**
+     * Lists the deprecation statuses.
+     *
+     * @generated from protobuf rpc: GetDeprecations
+     */
+    getDeprecations(input: GetDeprecationsRequest, options?: RpcOptions): UnaryCall<GetDeprecationsRequest, GetDeprecationsResponse>;
+    /**
+     * Creates or updates a deprecation status.
+     *
+     * @generated from protobuf rpc: UpdateDeprecation
+     */
+    updateDeprecation(input: UpdateDeprecationRequest, options?: RpcOptions): UnaryCall<UpdateDeprecationRequest, UpdateDeprecationResponse>;
+}
+/**
+ * Configuration manages the revisor schemas that the user service
+ * validates settings documents and inbox messages against. Schemas are
+ * grouped into config generations that are registered and switched
+ * atomically.
+ *
+ * @generated from protobuf service elephant.user.Configuration
+ */
+export class ConfigurationClient implements IConfigurationClient, ServiceInfo {
+    typeName = Configuration.typeName;
+    methods = Configuration.methods;
+    options = Configuration.options;
+    constructor(private readonly _transport: RpcTransport) {
+    }
+    /**
+     * Registers a new config generation. Registration is idempotent: a
+     * generation containing the same set of schemas returns the already
+     * registered generation (its description is left unchanged). If
+     * activate is set and the matched generation is inactive it will be
+     * activated.
+     *
+     * @generated from protobuf rpc: RegisterConfigGeneration
+     */
+    registerConfigGeneration(input: RegisterConfigGenerationRequest, options?: RpcOptions): UnaryCall<RegisterConfigGenerationRequest, RegisterConfigGenerationResponse> {
+        const method = this.methods[0], opt = this._transport.mergeOptions(options);
+        return stackIntercept<RegisterConfigGenerationRequest, RegisterConfigGenerationResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Activates a registered config generation, deactivating the
+     * previously active generation.
+     *
+     * @generated from protobuf rpc: ActivateConfigGeneration
+     */
+    activateConfigGeneration(input: ActivateConfigGenerationRequest, options?: RpcOptions): UnaryCall<ActivateConfigGenerationRequest, ActivateConfigGenerationResponse> {
+        const method = this.methods[1], opt = this._transport.mergeOptions(options);
+        return stackIntercept<ActivateConfigGenerationRequest, ActivateConfigGenerationResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Gets the currently active config generation. Supports long-polling
+     * for generation changes.
+     *
+     * @generated from protobuf rpc: GetActiveConfigGeneration
+     */
+    getActiveConfigGeneration(input: GetActiveConfigGenerationRequest, options?: RpcOptions): UnaryCall<GetActiveConfigGenerationRequest, GetActiveConfigGenerationResponse> {
+        const method = this.methods[2], opt = this._transport.mergeOptions(options);
+        return stackIntercept<GetActiveConfigGenerationRequest, GetActiveConfigGenerationResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Lists registered config generations, newest first.
+     *
+     * @generated from protobuf rpc: ListConfigGenerations
+     */
+    listConfigGenerations(input: ListConfigGenerationsRequest, options?: RpcOptions): UnaryCall<ListConfigGenerationsRequest, ListConfigGenerationsResponse> {
+        const method = this.methods[3], opt = this._transport.mergeOptions(options);
+        return stackIntercept<ListConfigGenerationsRequest, ListConfigGenerationsResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Gets a stored schema.
+     *
+     * @generated from protobuf rpc: GetSchema
+     */
+    getSchema(input: GetSchemaRequest, options?: RpcOptions): UnaryCall<GetSchemaRequest, GetSchemaResponse> {
+        const method = this.methods[4], opt = this._transport.mergeOptions(options);
+        return stackIntercept<GetSchemaRequest, GetSchemaResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Lists the deprecation statuses.
+     *
+     * @generated from protobuf rpc: GetDeprecations
+     */
+    getDeprecations(input: GetDeprecationsRequest, options?: RpcOptions): UnaryCall<GetDeprecationsRequest, GetDeprecationsResponse> {
+        const method = this.methods[5], opt = this._transport.mergeOptions(options);
+        return stackIntercept<GetDeprecationsRequest, GetDeprecationsResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * Creates or updates a deprecation status.
+     *
+     * @generated from protobuf rpc: UpdateDeprecation
+     */
+    updateDeprecation(input: UpdateDeprecationRequest, options?: RpcOptions): UnaryCall<UpdateDeprecationRequest, UpdateDeprecationResponse> {
+        const method = this.methods[6], opt = this._transport.mergeOptions(options);
+        return stackIntercept<UpdateDeprecationRequest, UpdateDeprecationResponse>("unary", this._transport, method, opt, input);
     }
 }

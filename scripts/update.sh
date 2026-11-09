@@ -14,6 +14,8 @@ function cleanup {
 
 trap cleanup EXIT
 
+cd "$(dirname "$0")/.."
+
 if [ -z "$tag" ]; then
     git clone $src_repo $checkout
 
@@ -22,12 +24,12 @@ if [ -z "$tag" ]; then
 
     git -C $checkout checkout $tag >/dev/null 2>&1
 else
-    git clone --depth 1 --branch $tag $src_repo
+    git clone --depth 1 --branch $tag $src_repo $checkout
 fi
 
-# Check if the tag already exists in the current repo.
-if git rev-parse "$tag" >/dev/null 2>&1; then
-    echo "Tag already exist, no code generation is necessary"
+# The package version tracks the proto repo tag it was generated from.
+if [ "$(node -p "require('./package.json').version")" = "${tag#v}" ]; then
+    echo "Already generated from $tag, no code generation is necessary"
     exit 0
 fi
 
@@ -52,14 +54,14 @@ done
 # Build the docker image, just temporary, should live in a separate repo.
 docker buildx build \
        -t node-protobuf --load \
-       --build-arg="protoc_version=29.4-r0" ./src
+       --build-arg="protoc_version=31.1-r1" ./src
 
 docker run --rm \
        -v "$(pwd):/usr/src" \
        -v "${node_modules}:/usr/src/node_modules" \
        -u "$(id -u):$(id -u)" \
        -w "/usr/src" \
-       node-protobuf sh -c "npm install --ignore-scripts"
+       node-protobuf sh -c "npx --yes pnpm@11 install --ignore-scripts --ignore-workspace --no-lockfile --store-dir /tmp/pnpm-store"
 
 # Generate clients
 for service in ${services[@]}; do
@@ -84,7 +86,7 @@ EOF
     fi
 done
 
-npm run build
+pnpm run build
 
 echo Updated to $tag
-echo Finish up and tag a new release with: npm version $tag
+echo "Finish up and record the release with: pnpm change"

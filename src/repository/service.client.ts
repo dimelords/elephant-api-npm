@@ -261,7 +261,12 @@ export interface IDocumentsClient {
      */
     getPermissions(input: GetPermissionsRequest, options?: RpcOptions): UnaryCall<GetPermissionsRequest, GetPermissionsResponse>;
     /**
-     * Lock attempts to acquire a write lock on a document.
+     * Lock attempts to acquire a write lock on a document. Fails with
+     * FailedPrecondition when the document is already locked; the
+     * failure carries error metadata keys "lock_holder_sub",
+     * "lock_app", "lock_comment" and "lock_expires" so callers can
+     * distinguish "held by me" (look up the token in own state) from
+     * "held by someone else" (surface to the user).
      *
      * @generated from protobuf rpc: Lock
      */
@@ -524,7 +529,12 @@ export class DocumentsClient implements IDocumentsClient, ServiceInfo {
         return stackIntercept<GetPermissionsRequest, GetPermissionsResponse>("unary", this._transport, method, opt, input);
     }
     /**
-     * Lock attempts to acquire a write lock on a document.
+     * Lock attempts to acquire a write lock on a document. Fails with
+     * FailedPrecondition when the document is already locked; the
+     * failure carries error metadata keys "lock_holder_sub",
+     * "lock_app", "lock_comment" and "lock_expires" so callers can
+     * distinguish "held by me" (look up the token in own state) from
+     * "held by someone else" (surface to the user).
      *
      * @generated from protobuf rpc: Lock
      */

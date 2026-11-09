@@ -863,6 +863,60 @@ export interface FieldValuesV1 {
     values: string[];
 }
 /**
+ * @generated from protobuf message elephant.index.GetFlatDocumentRequest
+ */
+export interface GetFlatDocumentRequest {
+    /**
+     * UUID of the document to flatten.
+     *
+     * @generated from protobuf field: string uuid = 1
+     */
+    uuid: string;
+    /**
+     * Version of the document to fetch. Optional, defaults to the current
+     * version. Ignored when stored is set.
+     *
+     * @generated from protobuf field: int64 version = 2
+     */
+    version: bigint;
+    /**
+     * Status name used to select the document version to fetch, as an alternative
+     * to version. Optional. Ignored when stored is set.
+     *
+     * @generated from protobuf field: string status = 3
+     */
+    status: string;
+    /**
+     * Stored returns the flattened document as it is currently stored in the
+     * active index instead of converting the current version from the
+     * repository. This reflects the indexed state, and is therefore subject to
+     * the eventual consistency of the index.
+     *
+     * @generated from protobuf field: bool stored = 4
+     */
+    stored: boolean;
+}
+/**
+ * @generated from protobuf message elephant.index.GetFlatDocumentResponse
+ */
+export interface GetFlatDocumentResponse {
+    /**
+     * Fields is the flattened representation of the document, keyed by field name.
+     *
+     * @generated from protobuf field: map<string, elephant.index.FieldValuesV1> fields = 1
+     */
+    fields: {
+        [key: string]: FieldValuesV1;
+    };
+    /**
+     * Document that was flattened. Only populated when converting from the
+     * repository, not when returning the stored document.
+     *
+     * @generated from protobuf field: newsdoc.Document document = 2
+     */
+    document?: Document;
+}
+/**
  * @generated from protobuf message elephant.index.GetMappingsRequestV1
  */
 export interface GetMappingsRequestV1 {
@@ -3735,6 +3789,151 @@ class FieldValuesV1$Type extends MessageType<FieldValuesV1> {
  */
 export const FieldValuesV1 = new FieldValuesV1$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class GetFlatDocumentRequest$Type extends MessageType<GetFlatDocumentRequest> {
+    constructor() {
+        super("elephant.index.GetFlatDocumentRequest", [
+            { no: 1, name: "uuid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "version", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 3, name: "status", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "stored", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetFlatDocumentRequest>): GetFlatDocumentRequest {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.uuid = "";
+        message.version = 0n;
+        message.status = "";
+        message.stored = false;
+        if (value !== undefined)
+            reflectionMergePartial<GetFlatDocumentRequest>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetFlatDocumentRequest): GetFlatDocumentRequest {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string uuid */ 1:
+                    message.uuid = reader.string();
+                    break;
+                case /* int64 version */ 2:
+                    message.version = reader.int64().toBigInt();
+                    break;
+                case /* string status */ 3:
+                    message.status = reader.string();
+                    break;
+                case /* bool stored */ 4:
+                    message.stored = reader.bool();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetFlatDocumentRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string uuid = 1; */
+        if (message.uuid !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.uuid);
+        /* int64 version = 2; */
+        if (message.version !== 0n)
+            writer.tag(2, WireType.Varint).int64(message.version);
+        /* string status = 3; */
+        if (message.status !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.status);
+        /* bool stored = 4; */
+        if (message.stored !== false)
+            writer.tag(4, WireType.Varint).bool(message.stored);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.index.GetFlatDocumentRequest
+ */
+export const GetFlatDocumentRequest = new GetFlatDocumentRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetFlatDocumentResponse$Type extends MessageType<GetFlatDocumentResponse> {
+    constructor() {
+        super("elephant.index.GetFlatDocumentResponse", [
+            { no: 1, name: "fields", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "message", T: () => FieldValuesV1 } },
+            { no: 2, name: "document", kind: "message", T: () => Document }
+        ]);
+    }
+    create(value?: PartialMessage<GetFlatDocumentResponse>): GetFlatDocumentResponse {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.fields = {};
+        if (value !== undefined)
+            reflectionMergePartial<GetFlatDocumentResponse>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetFlatDocumentResponse): GetFlatDocumentResponse {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* map<string, elephant.index.FieldValuesV1> fields */ 1:
+                    this.binaryReadMap1(message.fields, reader, options);
+                    break;
+                case /* newsdoc.Document document */ 2:
+                    message.document = Document.internalBinaryRead(reader, reader.uint32(), options, message.document);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    private binaryReadMap1(map: GetFlatDocumentResponse["fields"], reader: IBinaryReader, options: BinaryReadOptions): void {
+        let len = reader.uint32(), end = reader.pos + len, key: keyof GetFlatDocumentResponse["fields"] | undefined, val: GetFlatDocumentResponse["fields"][any] | undefined;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case 1:
+                    key = reader.string();
+                    break;
+                case 2:
+                    val = FieldValuesV1.internalBinaryRead(reader, reader.uint32(), options);
+                    break;
+                default: throw new globalThis.Error("unknown map entry field for elephant.index.GetFlatDocumentResponse.fields");
+            }
+        }
+        map[key ?? ""] = val ?? FieldValuesV1.create();
+    }
+    internalBinaryWrite(message: GetFlatDocumentResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* map<string, elephant.index.FieldValuesV1> fields = 1; */
+        for (let k of globalThis.Object.keys(message.fields)) {
+            writer.tag(1, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k);
+            writer.tag(2, WireType.LengthDelimited).fork();
+            FieldValuesV1.internalBinaryWrite(message.fields[k], writer, options);
+            writer.join().join();
+        }
+        /* newsdoc.Document document = 2; */
+        if (message.document)
+            Document.internalBinaryWrite(message.document, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message elephant.index.GetFlatDocumentResponse
+ */
+export const GetFlatDocumentResponse = new GetFlatDocumentResponse$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class GetMappingsRequestV1$Type extends MessageType<GetMappingsRequestV1> {
     constructor() {
         super("elephant.index.GetMappingsRequestV1", [
@@ -4419,6 +4618,7 @@ export const Management = new ServiceType("elephant.index.Management", [
 export const SearchV1 = new ServiceType("elephant.index.SearchV1", [
     { name: "Query", options: {}, I: QueryRequestV1, O: QueryResponseV1 },
     { name: "MultiSearch", options: {}, I: MultiSearchRequest, O: MultiSearchResponse },
+    { name: "GetFlatDocument", options: {}, I: GetFlatDocumentRequest, O: GetFlatDocumentResponse },
     { name: "GetMappings", options: {}, I: GetMappingsRequestV1, O: GetMappingsResponseV1 },
     { name: "PollSubscription", options: {}, I: PollSubscriptionRequest, O: PollSubscriptionResponse },
     { name: "EndSubscription", options: {}, I: EndSubscriptionRequest, O: EndSubscriptionResponse }

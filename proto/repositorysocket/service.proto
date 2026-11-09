@@ -59,7 +59,7 @@ message GetEventlog {
   // subscription without missing events.
   string name = 1;
   // After allows the client to subscribe from after a given event ID. The
-  // server only buffers a limited amount of events (defaults to 100) and
+  // server only buffers a limited amount of events (defaults to 500) and
   // requesting events from before the range of that buffer will result in a
   // resume out of bounds "eventlog_resume_oob" error.
   optional int64 after = 2;
@@ -74,6 +74,10 @@ message GetEventlog {
   // TypeSubsets are used to apply subset newsdoc value extractors to documents
   // and include the results with the event data. Keyed by document type.
   map<string, Subsets> type_subsets = 5;
+  // Events are the event types the client wants events for, one of: "document",
+  // "status", "acl", "delete_document", "restore_finished", "workflow". If no
+  // event types are provided all event types will be included.
+  repeated string events = 6;
 }
 
 message Subsets {

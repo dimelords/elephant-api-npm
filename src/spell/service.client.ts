@@ -3,9 +3,24 @@
 // @generated from protobuf file "spell/service.proto" (package "elephant.spell", syntax proto3)
 // tslint:disable
 // @ts-nocheck
+import { Rules } from "./service";
+import type { DeleteRuleResponse } from "./service";
+import type { DeleteRuleRequest } from "./service";
+import type { SetRuleStatusResponse } from "./service";
+import type { SetRuleStatusRequest } from "./service";
+import type { SetRuleResponse } from "./service";
+import type { SetRuleRequest } from "./service";
+import type { GetRuleResponse } from "./service";
+import type { GetRuleRequest } from "./service";
+import type { ListRulesResponse } from "./service";
+import type { ListRulesRequest } from "./service";
 import { Dictionaries } from "./service";
+import type { RenameEntryResponse } from "./service";
+import type { RenameEntryRequest } from "./service";
 import type { DeleteEntryResponse } from "./service";
 import type { DeleteEntryRequest } from "./service";
+import type { SetEntryStatusResponse } from "./service";
+import type { SetEntryStatusRequest } from "./service";
 import type { SetEntryResponse } from "./service";
 import type { SetEntryRequest } from "./service";
 import type { GetEntryResponse } from "./service";
@@ -113,11 +128,27 @@ export interface IDictionariesClient {
      */
     setEntry(input: SetEntryRequest, options?: RpcOptions): UnaryCall<SetEntryRequest, SetEntryResponse>;
     /**
+     * SetEntryStatus updates only the moderation status of an entry. It is a
+     * lightweight alternative to SetEntry for accept/reject workflows that don't
+     * need to round-trip the whole entry.
+     *
+     * @generated from protobuf rpc: SetEntryStatus
+     */
+    setEntryStatus(input: SetEntryStatusRequest, options?: RpcOptions): UnaryCall<SetEntryStatusRequest, SetEntryStatusResponse>;
+    /**
      * DeleteEntry is used to remove an entry.
      *
      * @generated from protobuf rpc: DeleteEntry
      */
     deleteEntry(input: DeleteEntryRequest, options?: RpcOptions): UnaryCall<DeleteEntryRequest, DeleteEntryResponse>;
+    /**
+     * RenameEntry changes the text of a custom dictionary entry, keeping the rest
+     * of its data. The text is the entry's identity, so renaming is a dedicated
+     * operation rather than a SetEntry.
+     *
+     * @generated from protobuf rpc: RenameEntry
+     */
+    renameEntry(input: RenameEntryRequest, options?: RpcOptions): UnaryCall<RenameEntryRequest, RenameEntryResponse>;
 }
 /**
  * Dictionaries is used to manage custom dictionary entries. Custom dictionaries
@@ -177,12 +208,132 @@ export class DictionariesClient implements IDictionariesClient, ServiceInfo {
         return stackIntercept<SetEntryRequest, SetEntryResponse>("unary", this._transport, method, opt, input);
     }
     /**
+     * SetEntryStatus updates only the moderation status of an entry. It is a
+     * lightweight alternative to SetEntry for accept/reject workflows that don't
+     * need to round-trip the whole entry.
+     *
+     * @generated from protobuf rpc: SetEntryStatus
+     */
+    setEntryStatus(input: SetEntryStatusRequest, options?: RpcOptions): UnaryCall<SetEntryStatusRequest, SetEntryStatusResponse> {
+        const method = this.methods[5], opt = this._transport.mergeOptions(options);
+        return stackIntercept<SetEntryStatusRequest, SetEntryStatusResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
      * DeleteEntry is used to remove an entry.
      *
      * @generated from protobuf rpc: DeleteEntry
      */
     deleteEntry(input: DeleteEntryRequest, options?: RpcOptions): UnaryCall<DeleteEntryRequest, DeleteEntryResponse> {
-        const method = this.methods[5], opt = this._transport.mergeOptions(options);
+        const method = this.methods[6], opt = this._transport.mergeOptions(options);
         return stackIntercept<DeleteEntryRequest, DeleteEntryResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * RenameEntry changes the text of a custom dictionary entry, keeping the rest
+     * of its data. The text is the entry's identity, so renaming is a dedicated
+     * operation rather than a SetEntry.
+     *
+     * @generated from protobuf rpc: RenameEntry
+     */
+    renameEntry(input: RenameEntryRequest, options?: RpcOptions): UnaryCall<RenameEntryRequest, RenameEntryResponse> {
+        const method = this.methods[7], opt = this._transport.mergeOptions(options);
+        return stackIntercept<RenameEntryRequest, RenameEntryResponse>("unary", this._transport, method, opt, input);
+    }
+}
+/**
+ * Rules manages pattern rules, which match a text pattern with placeholders
+ * rather than fixed strings. They are a separate kind of entity from dictionary
+ * words.
+ *
+ * @generated from protobuf service elephant.spell.Rules
+ */
+export interface IRulesClient {
+    /**
+     * ListRules lists pattern rules.
+     *
+     * @generated from protobuf rpc: ListRules
+     */
+    listRules(input: ListRulesRequest, options?: RpcOptions): UnaryCall<ListRulesRequest, ListRulesResponse>;
+    /**
+     * GetRule returns the details of a single rule.
+     *
+     * @generated from protobuf rpc: GetRule
+     */
+    getRule(input: GetRuleRequest, options?: RpcOptions): UnaryCall<GetRuleRequest, GetRuleResponse>;
+    /**
+     * SetRule adds or updates a rule.
+     *
+     * @generated from protobuf rpc: SetRule
+     */
+    setRule(input: SetRuleRequest, options?: RpcOptions): UnaryCall<SetRuleRequest, SetRuleResponse>;
+    /**
+     * SetRuleStatus updates only the moderation status of a rule.
+     *
+     * @generated from protobuf rpc: SetRuleStatus
+     */
+    setRuleStatus(input: SetRuleStatusRequest, options?: RpcOptions): UnaryCall<SetRuleStatusRequest, SetRuleStatusResponse>;
+    /**
+     * DeleteRule removes a rule.
+     *
+     * @generated from protobuf rpc: DeleteRule
+     */
+    deleteRule(input: DeleteRuleRequest, options?: RpcOptions): UnaryCall<DeleteRuleRequest, DeleteRuleResponse>;
+}
+/**
+ * Rules manages pattern rules, which match a text pattern with placeholders
+ * rather than fixed strings. They are a separate kind of entity from dictionary
+ * words.
+ *
+ * @generated from protobuf service elephant.spell.Rules
+ */
+export class RulesClient implements IRulesClient, ServiceInfo {
+    typeName = Rules.typeName;
+    methods = Rules.methods;
+    options = Rules.options;
+    constructor(private readonly _transport: RpcTransport) {
+    }
+    /**
+     * ListRules lists pattern rules.
+     *
+     * @generated from protobuf rpc: ListRules
+     */
+    listRules(input: ListRulesRequest, options?: RpcOptions): UnaryCall<ListRulesRequest, ListRulesResponse> {
+        const method = this.methods[0], opt = this._transport.mergeOptions(options);
+        return stackIntercept<ListRulesRequest, ListRulesResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * GetRule returns the details of a single rule.
+     *
+     * @generated from protobuf rpc: GetRule
+     */
+    getRule(input: GetRuleRequest, options?: RpcOptions): UnaryCall<GetRuleRequest, GetRuleResponse> {
+        const method = this.methods[1], opt = this._transport.mergeOptions(options);
+        return stackIntercept<GetRuleRequest, GetRuleResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * SetRule adds or updates a rule.
+     *
+     * @generated from protobuf rpc: SetRule
+     */
+    setRule(input: SetRuleRequest, options?: RpcOptions): UnaryCall<SetRuleRequest, SetRuleResponse> {
+        const method = this.methods[2], opt = this._transport.mergeOptions(options);
+        return stackIntercept<SetRuleRequest, SetRuleResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * SetRuleStatus updates only the moderation status of a rule.
+     *
+     * @generated from protobuf rpc: SetRuleStatus
+     */
+    setRuleStatus(input: SetRuleStatusRequest, options?: RpcOptions): UnaryCall<SetRuleStatusRequest, SetRuleStatusResponse> {
+        const method = this.methods[3], opt = this._transport.mergeOptions(options);
+        return stackIntercept<SetRuleStatusRequest, SetRuleStatusResponse>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * DeleteRule removes a rule.
+     *
+     * @generated from protobuf rpc: DeleteRule
+     */
+    deleteRule(input: DeleteRuleRequest, options?: RpcOptions): UnaryCall<DeleteRuleRequest, DeleteRuleResponse> {
+        const method = this.methods[4], opt = this._transport.mergeOptions(options);
+        return stackIntercept<DeleteRuleRequest, DeleteRuleResponse>("unary", this._transport, method, opt, input);
     }
 }

@@ -56,7 +56,12 @@ service Documents {
   rpc GetStatusOverview(GetStatusOverviewRequest) returns (GetStatusOverviewResponse);
   // GetPermissions returns the permissions you have for the document.
   rpc GetPermissions(GetPermissionsRequest) returns (GetPermissionsResponse);
-  // Lock attempts to acquire a write lock on a document.
+  // Lock attempts to acquire a write lock on a document. Fails with
+  // FailedPrecondition when the document is already locked; the
+  // failure carries error metadata keys "lock_holder_sub",
+  // "lock_app", "lock_comment" and "lock_expires" so callers can
+  // distinguish "held by me" (look up the token in own state) from
+  // "held by someone else" (surface to the user).
   rpc Lock(LockRequest) returns (LockResponse);
   // ExtendLock extends the expiration of an existing lock.
   rpc ExtendLock(ExtendLockRequest) returns (LockResponse);
@@ -489,9 +494,12 @@ message GetDocumentRequest {
   // Status is used to fetch the version of the document references by the last
   // status update. Can be used instead of specifying a version.
   string status               = 3;
-  // Lock will lock the document for updates. This only affects the creation of
-  // new versions of the document, statuses can still be updated.
-  bool lock                   = 4;
+  // Lock, when set, acquires a write lock on the document as part of the Get
+  // request. By default the lock only affects the creation of new versions;
+  // statuses and ACLs can still be updated. Set the lock exclusivity to also
+  // block status and/or ACL updates. The granted lock is returned in the
+  // response on success.
+  AcquireLock lock            = 4;
   // MetaDocument controls the inclusion of associated meta
   // documents. "META_INCLUDE" will include the document if it
   // exists. "META_ONLY" will only return the meta document, and will return a
@@ -522,6 +530,8 @@ message GetDocumentResponse {
   string main_document      = 6;
   // Subset is the extracted subset of the document.
   repeated ExtractedValues subset = 7;
+  // Lock is the granted lock when the request set lock.
+  LockGrant lock                  = 8;
 }
 
 message ExtractedValues {
@@ -908,6 +918,24 @@ message Lock {
   string app = 5;
   // Optional free-form comment.
   string comment = 6;
+  // Exclusivity level of the lock.
+  LockExclusivity exclusivity = 7;
+}
+
+// LockExclusivity controls which operations a document lock blocks for
+// callers that don't hold the lock token. Document updates (new versions,
+// deletes) are always blocked by a lock; the exclusivity level can extend
+// the lock to also cover status and ACL updates.
+enum LockExclusivity {
+  // Block document updates only. Statuses and ACLs can still be updated
+  // by others. This is the default.
+  LOCK_DOCUMENT = 0;
+  // Block document and status updates.
+  LOCK_STATUS = 1;
+  // Block document and ACL updates.
+  LOCK_ACL = 2;
+  // Block document, status, and ACL updates.
+  LOCK_EXCLUSIVE = 3;
 }
 
 message RegisterMetaTypeRequest {
@@ -1173,11 +1201,37 @@ message LockRequest {
   string app = 3;
   // Free-form comment string. Optional.
   string comment = 4;
+  // Exclusivity controls which operations the lock blocks. Defaults to
+  // LOCK_DOCUMENT, which only blocks document updates.
+  LockExclusivity exclusivity = 5;
 }
 
 message LockResponse {
   // Generated lock token in UUID format.
   string token = 1;
+  // Expires is the RFC3339 timestamp when the lock will expire.
+  string expires = 2;
+}
+
+// AcquireLock describes a lock to acquire as part of a GetDocument request.
+// It mirrors LockRequest, but omits the redundant document UUID.
+message AcquireLock {
+  // Lock TTL in milliseconds.
+  int32 ttl     = 1;
+  // Name of the locking application. Optional.
+  string app     = 2;
+  // Free-form comment string. Optional.
+  string comment = 3;
+  // Exclusivity controls which operations the lock blocks. Defaults to
+  // LOCK_DOCUMENT, which only blocks document updates.
+  LockExclusivity exclusivity = 4;
+}
+
+// LockGrant is the lock returned when a GetDocument request successfully
+// acquired a lock via its lock field. It mirrors LockResponse.
+message LockGrant {
+  // Generated lock token in UUID format.
+  string token   = 1;
   // Expires is the RFC3339 timestamp when the lock will expire.
   string expires = 2;
 }

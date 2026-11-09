@@ -2,7 +2,7 @@
   "name": "@dimelords/elephant-api-npm",
   "private": false,
   "license": "MIT",
-  "version": "0.22.3",
+  "version": "0.24.3",
   "type": "module",
   "exports": {
     "./repository": {
@@ -95,24 +95,19 @@
     "url": "git+https://github.com/dimelords/elephant-api-npm.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:repository": "tsdown ./src/repository/index.ts --format cjs,esm --dts --outDir ./dist/repository",
-    "build:repositorysocket": "tsdown ./src/repositorysocket/index.ts --format cjs,esm --dts --outDir ./dist/repositorysocket",
-    "build:newsdoc": "tsdown ./src/newsdoc/newsdoc.ts --format cjs,esm --dts --outDir ./dist/newsdoc",
-    "build:index": "tsdown ./src/index/index.ts --format cjs,esm --dts --outDir ./dist/index",
-    "build:spell": "tsdown ./src/spell/index.ts --format cjs,esm --dts --outDir ./dist/spell",
-    "build:user": "tsdown ./src/user/index.ts --format cjs,esm --dts --outDir ./dist/user",
-    "build:replicant": "tsdown ./src/replicant/index.ts --format cjs,esm --dts --outDir ./dist/replicant",
-    "build:genai": "tsdown ./src/genai/index.ts --format cjs,esm --dts --outDir ./dist/genai",
-    "build": "npm run build:repository && npm run build:repositorysocket && npm run build:newsdoc && npm run build:index && npm run build:spell && npm run build:user && npm run build:replicant && npm run build:genai",
-    "update": "bash .github/workflows/update.sh",
-    "prepublish": "npm run build"
+    "test": "echo \"no tests\"",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --cache --report-unused-disable-directives --max-warnings 0",
+    "build": "npm run typecheck && tsdown",
+    "update": "bash scripts/update.sh",
+    "prepublishOnly": "npm run build"
   },
   "author": "",
   "description": "",
   "devDependencies": {
     "@protobuf-ts/plugin": "^2.11.1",
-    "tsdown": "^0.21.10"
+    "tsdown": "^0.22.14",
+    "typescript": "^6.0.3"
   },
   "files": [
     "dist"
